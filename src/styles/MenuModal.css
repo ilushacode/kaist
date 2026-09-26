@@ -1,0 +1,340 @@
+/* MENU MODAL */
+
+.menu-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.5rem 1rem 2rem;
+  background: var(--background-color);
+  overflow-y: auto;
+  scrollbar-width: none;
+
+  /* Страховка: модалка целиком никогда не превышает 80% высоты экрана. */
+  max-height: 80dvh;
+}
+.menu-modal::-webkit-scrollbar { display: none; }
+
+/* --- Блок групп --- */
+
+.menu-modal__group {
+  display: flex;
+  flex-direction: column;
+  background-color: color-mix(in srgb, var(--accent-background-color) 55%, transparent);
+  border-radius: 1.15rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.menu-modal__group__row {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  color: var(--font-color);
+  font: inherit;
+  text-align: left;
+}
+
+.menu-modal__group__row:disabled {
+  opacity: 0.5;
+}
+
+.menu-modal__group__label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--light-font-color);
+  opacity: 0.75;
+}
+
+.menu-modal__group__value {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--font-color);
+  display: inline-block;
+}
+
+.menu-modal__group__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--light-font-color);
+  opacity: 0.7;
+}
+
+/* Выпадающий список */
+
+.menu-modal__group__dropdown {
+  min-height: 0;
+}
+
+.menu-modal__group__dropdown-inner {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.35rem 0.35rem;
+  border-top: 1px solid color-mix(in srgb, var(--light-font-color) 12%, transparent);
+}
+
+/* Область со списком групп:
+   - растёт вместе с контентом,
+   - упирается в max-height ~5 строк,
+   - дальше — внутренний скролл,
+   - полоса прокрутки скрыта. */
+.menu-modal__group__scroll {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 12rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+
+  /* Скрываем скроллбар: Firefox */
+  scrollbar-width: none;
+  scrollbar-color: transparent transparent;
+  -ms-overflow-style: none;
+}
+
+/* Скрываем скроллбар: WebKit/Blink */
+.menu-modal__group__scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.menu-modal__group__item {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  font-variant-numeric: tabular-nums;
+  position: relative;
+  flex-shrink: 0;
+  min-height: 2.3rem;
+  box-sizing: border-box;
+}
+
+.menu-modal__group__item__check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.menu-modal__group__item__num {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--font-color);
+  letter-spacing: -0.005em;
+}
+
+.menu-modal__group__item--active {
+  background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
+}
+.menu-modal__group__item--active .menu-modal__group__item__num {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.menu-modal__group__item__remove {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  color: var(--light-font-color);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.menu-modal__group__item__remove:active {
+  background-color: color-mix(in srgb, #ff3b30 15%, transparent);
+  color: #ff3b30;
+}
+
+.menu-modal__group__add {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.75rem;
+  margin-top: 0.1rem;
+  border-radius: 0.65rem;
+  color: var(--primary-color);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+/* --- Основные секции --- */
+
+.menu-modal__section {
+  display: flex;
+  flex-direction: column;
+  border-radius: 1.15rem;
+  background-color: color-mix(in srgb, var(--accent-background-color) 55%, transparent);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.menu-modal__item {
+  display: grid;
+  grid-template-columns: 1.9rem 1fr auto auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.8rem 1rem;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  position: relative;
+}
+
+.menu-modal__item + .menu-modal__item::before {
+  content: "";
+  position: absolute;
+  left: 3.7rem;
+  right: 1rem;
+  top: 0;
+  height: 1px;
+  background-color: color-mix(in srgb, var(--light-font-color) 14%, transparent);
+}
+
+.menu-modal__item--clickable {
+  cursor: pointer;
+}
+
+.menu-modal__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.6rem;
+  color: #fff;
+}
+
+.menu-modal__title {
+  font-size: 0.98rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--font-color);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-modal__right {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  color: var(--light-font-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.menu-modal__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.5rem;
+  border-radius: 0.4rem;
+  background-color: color-mix(in srgb, var(--light-font-color) 14%, transparent);
+  color: var(--light-font-color);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.menu-modal__chevron {
+  display: inline-flex;
+  align-items: center;
+  color: var(--light-font-color);
+  opacity: 0.55;
+}
+
+.menu-modal__item--theme {
+  position: relative;
+}
+
+/* Саб-панель */
+.menu-modal__subdropdown-inner {
+  display: flex;
+  flex-direction: column;
+  padding: 0.35rem 0.5rem 0.5rem;
+  background-color: color-mix(in srgb, var(--accent-background-color) 30%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--light-font-color) 10%, transparent);
+}
+
+.menu-modal__subdropdown__item {
+  display: grid;
+  grid-template-columns: 1.1rem 1.5rem 1fr;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.65rem 0.65rem;
+  border-radius: 0.55rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.menu-modal__subdropdown__item--active {
+  background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
+}
+
+.menu-modal__subdropdown__check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.menu-modal__subdropdown__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--light-font-color);
+  opacity: 0.85;
+}
+
+.menu-modal__subdropdown__item--active .menu-modal__subdropdown__icon {
+  color: var(--primary-color);
+  opacity: 1;
+}
+
+.menu-modal__subdropdown__label {
+  font-size: 0.92rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--font-color);
+}
+
+.menu-modal__subdropdown__item--active .menu-modal__subdropdown__label {
+  color: var(--primary-color);
+  font-weight: 600;
+}
