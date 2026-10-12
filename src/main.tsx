@@ -7,6 +7,7 @@ import { ModalProvider } from './providers/ModalProvider';
 import { HashRouter } from 'react-router-dom';
 import { PhoneFrame } from './components/PhoneFrameComponent';
 import { registerSW } from 'virtual:pwa-register';
+import { Analytics } from '@vercel/analytics/react';
 
 registerSW({ immediate: true });
 
@@ -19,6 +20,7 @@ createRoot(rootEl).render(
       <HashRouter>
         <ModalProvider>
           <App />
+          <Analytics />
         </ModalProvider>
       </HashRouter>
     </PhoneFrame>
