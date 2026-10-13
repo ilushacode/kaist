@@ -6,17 +6,17 @@ const config: Config = {
   roots: ['<rootDir>/src'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    '\\.(css|less|scss|sass)$': '<rootDir>/src/__mocks__/styleMock.ts',
     '\\.(png|jpg|jpeg|svg|webp|gif)$': '<rootDir>/src/__mocks__/fileMock.ts',
     '^virtual:pwa-register$': '<rootDir>/src/__mocks__/pwaRegister.ts',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
-      tsconfig: {
-        jsx: 'react-jsx',
-        esModuleInterop: true,
-      },
+      tsconfig: '<rootDir>/tsconfig.test.json',
+      // Отключаем TS-диагностику в тестах: типы проверяются
+      // через `npm run typecheck`, а не в тестовом прогоне.
+      diagnostics: false,
     }],
   },
   collectCoverageFrom: [

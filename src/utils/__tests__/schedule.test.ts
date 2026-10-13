@@ -14,17 +14,31 @@ describe('getSemesterStart', () => {
     expect(d.getMonth()).toBe(8);
     expect(d.getDate()).toBe(1);
   });
-  it('для весенних дат — 1 февраля следующего года', () => {
+
+  it('для зимних дат — 1 февраля того же года', () => {
     const d = getSemesterStart(new Date(2026, 2, 1));
     expect(d.getFullYear()).toBe(2026);
     expect(d.getMonth()).toBe(1);
+    expect(d.getDate()).toBe(1);
+  });
+
+  it('для января — 1 февраля того же года', () => {
+    const d = getSemesterStart(new Date(2026, 0, 15));
+    expect(d.getFullYear()).toBe(2026);
+    expect(d.getMonth()).toBe(1);
+    expect(d.getDate()).toBe(1);
+  });
+
+  it('для летних каникул (июль) — 1 сентября текущего года', () => {
+    const d = getSemesterStart(new Date(2026, 6, 15));
+    expect(d.getFullYear()).toBe(2026);
+    expect(d.getMonth()).toBe(8);
     expect(d.getDate()).toBe(1);
   });
 });
 
 describe('isEvenWeek', () => {
   it('первая неделя семестра — чётная', () => {
-    // 8 сентября 2025 — понедельник второй недели от 1 сентября
     const d = new Date(2025, 8, 8);
     expect(typeof isEvenWeek(d)).toBe('boolean');
   });
@@ -38,14 +52,17 @@ describe('isLessonOnDate', () => {
     const lesson: GroupScheduleLesson = { d: '1' };
     expect(isLessonOnDate(lesson, monday)).toBe(true);
   });
+
   it('не совпадает по дню недели', () => {
     const lesson: GroupScheduleLesson = { d: '2' };
     expect(isLessonOnDate(lesson, monday)).toBe(false);
   });
+
   it('совпадает по конкретной дате', () => {
     const lesson: GroupScheduleLesson = { d: '1', ds: ['08.09'] };
     expect(isLessonOnDate(lesson, monday)).toBe(true);
   });
+
   it('совпадает по полной дате', () => {
     const lesson: GroupScheduleLesson = { d: '1', ds: ['08.09.2025'] };
     expect(isLessonOnDate(lesson, monday)).toBe(true);
@@ -70,6 +87,7 @@ describe('mapLesson', () => {
     expect(mapped.type).toBe('lec');
     expect(mapped.dates).toEqual(['12.10']);
   });
+
   it('подставляет дефолты', () => {
     const mapped = mapLesson({});
     expect(mapped.time).toBe('');
@@ -85,6 +103,7 @@ describe('getLessonsForDate', () => {
   it('возвращает [] для undefined', () => {
     expect(getLessonsForDate(undefined, monday)).toEqual([]);
   });
+
   it('фильтрует и сортирует по времени', () => {
     const lessons: GroupScheduleLesson[] = [
       { d: '1', t: '11:00', s: 'B' },

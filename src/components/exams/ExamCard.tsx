@@ -4,6 +4,7 @@ import { Calendar, GraduationCap, School } from 'lucide-react';
 import { capitalizeName, formatBuilding } from '../../utils/string';
 import { stripLeadingZero, isPastDay, isTodayDay } from '../../utils/date';
 import { SPRING_DEFAULT } from '../../animations/presets';
+import { TeacherLink } from '../TeacherLink';
 import type { Exam } from '../../types';
 
 const CASCADE_STEP = 0.05;
@@ -53,9 +54,11 @@ export const ExamCard = memo(function ExamCard({ exam, index }: ExamCardProps) {
         {exam.teacher && (
           <span className="exams__meta__row">
             <GraduationCap size={14} strokeWidth={1.6} />
-            <span className="exams__meta__text">
-              {capitalizeName(exam.teacher)}
-            </span>
+            <TeacherLink
+              teacher={exam.teacher}
+              display={capitalizeName(exam.teacher)}
+              className="exams__meta__text"
+            />
           </span>
         )}
 

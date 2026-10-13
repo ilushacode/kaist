@@ -1,0 +1,176 @@
+/* TEACHER LESSON CARD */
+
+.teacher_lesson {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.9rem 1rem 0.95rem;
+  border-radius: 0.85rem;
+  background-color: color-mix(in srgb, var(--accent-background-color) 60%, transparent);
+  transition: background-color 0.15s ease, opacity 0.2s ease;
+  overflow: hidden;
+}
+
+.teacher_lesson--compact {
+  padding: 0.7rem 0.85rem 0.75rem;
+  gap: 0.4rem;
+}
+
+/* Активная пара (сейчас идёт) */
+
+.teacher_lesson--active {
+  background-color: color-mix(in srgb, var(--accent-background-color) 85%, transparent);
+}
+
+.teacher_lesson--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.85rem;
+  bottom: 0.85rem;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background-color: var(--primary-color);
+}
+
+.teacher_lesson--active .teacher_lesson__time {
+  color: var(--primary-color);
+}
+
+.teacher_lesson--active .teacher_lesson__type {
+  color: var(--primary-color);
+  opacity: 1;
+}
+
+/* Прошедшая пара */
+
+.teacher_lesson--past {
+  opacity: 0.5;
+}
+
+.teacher_lesson--past .teacher_lesson__subject {
+  font-weight: 500;
+}
+
+/* Шапка */
+
+.teacher_lesson__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.teacher_lesson__time {
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--font-color);
+  letter-spacing: -0.01em;
+}
+
+.teacher_lesson--compact .teacher_lesson__time {
+  font-size: 0.85rem;
+}
+
+.teacher_lesson__type {
+  font-size: 0.62rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--light-font-color);
+  opacity: 0.7;
+}
+
+/* Предмет */
+
+.teacher_lesson__subject {
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--font-color);
+  margin: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.teacher_lesson--compact .teacher_lesson__subject {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Метаданные */
+
+.teacher_lesson__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 0.1rem;
+}
+
+.teacher_lesson__meta__row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--light-font-color);
+  line-height: 1.3;
+  min-width: 0;
+}
+
+.teacher_lesson__meta__row > svg {
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.teacher_lesson__meta__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.teacher_lesson__meta__row--groups {
+  align-items: flex-start;
+}
+
+.teacher_lesson__groups-label {
+  flex-shrink: 0;
+  font-weight: 500;
+  color: var(--light-font-color);
+  opacity: 0.85;
+}
+
+.teacher_lesson__meta__text--groups {
+  white-space: normal;
+  word-break: break-word;
+  font-weight: 500;
+  color: var(--font-color);
+  opacity: 0.85;
+}
+
+/* Даты */
+
+.teacher_lesson__dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+}
+
+.teacher_lesson__date {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.35rem;
+  border: 1px solid color-mix(in srgb, var(--light-font-color) 22%, transparent);
+  font-size: 0.68rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--font-color);
+  line-height: 1;
+}

@@ -42,7 +42,7 @@
   text-align: center;
 }
 
-/* --- Строка преподавателя (без карточки) --- */
+/* Строка преподавателя (без карточки) */
 
 .teachers__item {
   position: relative;
@@ -138,4 +138,49 @@
   padding-left: 0.75rem;
   overflow-wrap: break-word;
   word-break: break-word;
+}
+
+/* КЛИКАБЕЛЬНАЯ СТРОКА ПРЕПОДА */
+
+.teachers__item--clickable {
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+  border-radius: 0.75rem;
+  margin: 0 -0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  user-select: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .teachers__item--clickable {
+    cursor: pointer;
+  }
+
+  .teachers__item--clickable:hover {
+    background-color: color-mix(in srgb, var(--accent-background-color) 40%, transparent);
+  }
+}
+
+.teachers__item--clickable:active {
+  background-color: color-mix(in srgb, var(--accent-background-color) 60%, transparent);
+  transform: scale(0.99);
+}
+
+.teachers__item--clickable:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.teachers__chevron {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  color: var(--light-font-color);
+  opacity: 0.5;
+  margin-left: auto;
+  padding-left: 0.5rem;
 }

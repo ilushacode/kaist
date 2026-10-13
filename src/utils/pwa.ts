@@ -1,5 +1,9 @@
 export const isStandaloneMode = (): boolean => {
-  if (import.meta.env.DEV) return true;
+  // Vite подставляет process.env.NODE_ENV на этапе сборки.
+  // В ts-jest — стандартный process.env, без import.meta.
+  const isDev =
+    typeof process !== 'undefined' && process.env?.NODE_ENV === 'development';
+  if (isDev) return true;
   if (typeof window === 'undefined') return false;
 
   const displayModes = ['standalone', 'fullscreen', 'minimal-ui'] as const;

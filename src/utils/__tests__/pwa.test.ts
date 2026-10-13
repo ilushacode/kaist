@@ -1,8 +1,12 @@
 import { isStandaloneMode, isMobileDevice } from '../pwa';
 
 describe('isStandaloneMode', () => {
-  it('в dev-режиме возвращает true', () => {
-    expect(isStandaloneMode()).toBe(true);
+  it('возвращает boolean', () => {
+    expect(typeof isStandaloneMode()).toBe('boolean');
+  });
+
+  it('в jsdom без standalone-режима возвращает false', () => {
+    expect(isStandaloneMode()).toBe(false);
   });
 });
 

@@ -1,4 +1,4 @@
-import { compareDay, formatDM, getMondayOfWeek } from './date';
+import { formatDM, getMondayOfWeek } from './date';
 import { getLessonType } from './lesson';
 import type { GroupScheduleLesson, Lesson } from '../types';
 
@@ -8,11 +8,17 @@ const ODD_WEEK = 'нечет';
 
 export const getSemesterStart = (date: Date): Date => {
   const year = date.getFullYear();
-  const autumnEnd = new Date(year, 11, 31);
-  if (compareDay(date, autumnEnd) <= 0) {
+  const month = date.getMonth();
+
+  if (month >= 8 && month <= 11) {
     return new Date(year, 8, 1);
   }
-  return new Date(year + 1, 1, 1);
+
+  if (month >= 0 && month <= 5) {
+    return new Date(year, 1, 1);
+  }
+
+  return new Date(year, 8, 1);
 };
 
 export const isEvenWeek = (date: Date): boolean => {

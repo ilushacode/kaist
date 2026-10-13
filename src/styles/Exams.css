@@ -24,7 +24,7 @@
   display: none;
 }
 
-/* --- Карточка экзамена --- */
+/* Карточка экзамена */
 
 .exams__item {
   display: flex;
@@ -42,7 +42,7 @@
   background-color: color-mix(in srgb, var(--accent-background-color) 85%, transparent);
 }
 
-/* --- Шапка: время + даты --- */
+/* Шапка: время + даты */
 
 .exams__header {
   display: flex;
@@ -63,7 +63,7 @@
   letter-spacing: -0.005em;
 }
 
-/* --- Даты --- */
+/* Даты */
 
 .exams__dates {
   display: flex;
@@ -98,7 +98,7 @@
   background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
 }
 
-/* --- Название дисциплины --- */
+/* Название дисциплины */
 
 .exams__title {
   font-size: 1.05rem;
@@ -111,7 +111,7 @@
   word-break: break-word;
 }
 
-/* --- Метаданные: преподаватель, место --- */
+/* Метаданные: преподаватель, место */
 
 .exams__meta {
   display: flex;
@@ -142,7 +142,7 @@
   white-space: nowrap;
 }
 
-/* --- Центрированные состояния --- */
+/* Центрированные состояния */
 
 .exams__centred {
   flex: 1;
@@ -174,4 +174,13 @@
   text-align: center;
   color: var(--light-font-color);
   margin: 0;
+}
+
+.exams__meta__row .teacher-link {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: inherit;
+  color: var(--light-font-color);
 }

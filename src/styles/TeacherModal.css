@@ -1,0 +1,174 @@
+/* TEACHER MODAL */
+
+.teacher_modal {
+  display: flex;
+  flex-direction: column;
+  /* Фиксированная высота — модалка не скачет при переключении дней. */
+  height: 75dvh;
+  max-height: 75dvh;
+  overflow: hidden;
+}
+
+/* Шапка */
+
+.teacher_modal__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  padding: 0.25rem 1.25rem 0.5rem;
+  min-width: 0;
+}
+
+.teacher_modal__label {
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--primary-color);
+  line-height: 1;
+}
+
+.teacher_modal__title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--font-color);
+  margin: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Полоса дат */
+
+.teacher_modal .day_list-wrapper {
+  flex-shrink: 0;
+  padding-top: 0.25rem;
+}
+
+.day_list__item__busy-mark {
+  display: block;
+  width: 0;
+  height: 2px;
+  border-radius: 1px;
+  background-color: var(--primary-color);
+  opacity: 0;
+  transition: width 0.2s ease, opacity 0.2s ease;
+  align-self: center;
+}
+
+.day_list__item__busy-mark--visible {
+  width: 14px;
+  opacity: 0.55;
+}
+
+.day_list__item__active .day_list__item__busy-mark--visible {
+  opacity: 0.9;
+}
+
+.day_list__item__disabled .day_list__item__busy-mark--visible {
+  opacity: 0.3;
+}
+
+/* Viewport + слайд */
+
+.teacher_modal__viewport {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  margin-top: 0.5rem;
+  touch-action: pan-y;
+}
+
+.teacher_modal__slide {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  touch-action: pan-y;
+  padding: 0 1.25rem 1.25rem;
+}
+
+.teacher_modal__slide::-webkit-scrollbar {
+  display: none;
+}
+
+.teacher_modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 100%;
+  padding-bottom: 0.5rem;
+}
+
+.teacher_modal__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  gap: 0.35rem;
+  text-align: center;
+  min-height: 100%;
+}
+
+.teacher_modal__empty__title {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--font-color);
+  margin: 0;
+}
+
+.teacher_modal__empty__subtitle {
+  font-size: 0.85rem;
+  color: var(--light-font-color);
+  margin: 0;
+}
+
+/* Экзамены */
+
+.teacher_modal__exams {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.85rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--light-font-color) 15%, transparent);
+}
+
+.teacher_modal__exams__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--light-font-color);
+  opacity: 0.8;
+  margin: 0;
+}
+
+.teacher_modal__exams__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+/* Центрированные состояния */
+
+.teacher_modal__centred {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  min-height: 12rem;
+}

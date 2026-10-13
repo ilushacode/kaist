@@ -1,7 +1,8 @@
-import { GraduationCap } from 'lucide-react';
+import { GraduationCap, ChevronRight } from 'lucide-react';
 import { addMinutes, isPastDay, isTodayDay, stripLeadingZero } from '../utils/date';
 import { capitalizeName, formatBuilding } from '../utils/string';
 import { getLessonTypeLabel } from '../utils/lesson';
+import { TeacherLink } from '../components/TeacherLink';
 import type { Lesson } from '../types';
 import '../styles/LessonModal.css';
 
@@ -56,9 +57,20 @@ export default function LessonModal({ lesson }: LessonModalProps) {
         <h3 className="lesson_modal__section__label">Преподаватель</h3>
         <div className="lesson_modal__teacher">
           <GraduationCap size={20} strokeWidth={1.6} className="lesson_modal__teacher__icon" />
-          <span className="lesson_modal__teacher__name">
-            {capitalizeName(lesson.teacher)}
-          </span>
+          <TeacherLink
+            teacher={lesson.teacher}
+            className="lesson_modal__teacher__name"
+          >
+            <span className="lesson_modal__teacher__name__text">
+              {capitalizeName(lesson.teacher)}
+            </span>
+            <ChevronRight
+              size={16}
+              strokeWidth={2.2}
+              className="lesson_modal__teacher__chevron"
+              aria-hidden="true"
+            />
+          </TeacherLink>
         </div>
       </section>
     </div>

@@ -1,0 +1,45 @@
+/* TEACHER LINK */
+
+.teacher-link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .teacher-link {
+    cursor: pointer;
+  }
+
+  .teacher-link:hover {
+    opacity: 0.75;
+  }
+}
+
+.teacher-link:active {
+  opacity: 0.6;
+}
+
+.teacher-link:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
