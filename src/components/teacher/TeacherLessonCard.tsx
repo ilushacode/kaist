@@ -8,6 +8,7 @@ import {
   stripLeadingZero,
 } from '../../utils/date';
 import type { CollapsedTeacherLesson } from '../../utils/teacherSchedule';
+import '../../styles/TeacherLesson.css';
 
 const LESSON_DURATION_MIN = 90;
 

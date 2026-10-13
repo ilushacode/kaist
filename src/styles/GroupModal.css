@@ -1,0 +1,203 @@
+/* GROUP MODAL */
+
+.group_modal {
+  display: flex;
+  flex-direction: column;
+  /* 50% от модели телефона. */
+  height: 50dvh;
+  max-height: 50dvh;
+  padding: 0;
+  overflow: hidden;
+}
+
+/* ─── Шапка ─── */
+
+.group_modal__header {
+  display: flex;
+  align-items: center;
+  padding: 1rem 1.25rem 0.75rem;
+  flex-shrink: 0;
+}
+
+.group_modal__title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--font-color);
+  margin: 0;
+}
+
+.group_modal__count {
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary-color);
+  background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  padding: 0.1rem 0.45rem;
+  border-radius: 0.4rem;
+  line-height: 1;
+}
+
+/* ─── Список групп ─── */
+
+.group_modal__list {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 0 1.25rem;
+}
+
+.group_modal__list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.group_modal__empty {
+  margin: auto;
+  font-size: 0.9rem;
+  color: var(--light-font-color);
+  opacity: 0.65;
+  text-align: center;
+}
+
+.group_modal__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.1rem 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  /* Компактная строка. */
+  padding: 0.55rem 0.25rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  min-height: 2.1rem;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease;
+}
+
+/* Разделитель между строками — тонкая линия под каждой, кроме последней. */
+.group_modal__item + .group_modal__item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 1.85rem;
+  right: 0.25rem;
+  height: 1px;
+  background-color: color-mix(in srgb, var(--light-font-color) 12%, transparent);
+}
+
+/* Активная группа — только лёгкая подсветка фона, без полоски слева. */
+.group_modal__item--active {
+  background-color: color-mix(in srgb, var(--primary-color) 6%, transparent);
+  border-radius: 0.6rem;
+  margin: 0 -0.5rem;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.group_modal__item__check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-color);
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.group_modal__item__num {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--font-color);
+  letter-spacing: -0.005em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.group_modal__item--active .group_modal__item__num {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.group_modal__item__remove {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  color: var(--light-font-color);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.group_modal__item__remove:active {
+  background-color: color-mix(in srgb, #ff3b30 15%, transparent);
+  color: #ff3b30;
+}
+
+/* Заглушка, когда групп ровно одна — чтобы сетка не «прыгала». */
+.group_modal__item__spacer {
+  display: block;
+  width: 1.7rem;
+  height: 1.7rem;
+}
+
+/* ─── Футер с кнопкой ─── */
+
+.group_modal__footer {
+  flex-shrink: 0;
+  padding: 0.5rem 1.25rem 1.25rem;
+  border-top: 1px solid color-mix(in srgb, var(--light-font-color) 12%, transparent);
+  margin-top: 0.25rem;
+}
+
+.group_modal__add {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.75rem 0.5rem;
+  border-radius: 0.6rem;
+  color: var(--primary-color);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s ease;
+  text-align: left;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .group_modal__add:hover {
+    background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
+  }
+}
+
+.group_modal__add:active {
+  background-color: color-mix(in srgb, var(--primary-color) 12%, transparent);
+}

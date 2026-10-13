@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, ChevronRight, Plus, X } from 'lucide-react';
 import { SPRING_FAST, SPRING_SOFT } from '../../animations/presets';
@@ -22,6 +22,14 @@ export function GroupSelector({
   canRemove,
 }: GroupSelectorProps) {
   const [open, setOpen] = useState(false);
+
+  // Активная группа — всегда первая, остальные в исходном порядке.
+  const orderedGroups = useMemo(() => {
+    if (!selectedGroup) return groups;
+    const active = groups.find((g) => g === selectedGroup);
+    if (!active) return groups;
+    return [active, ...groups.filter((g) => g !== active)];
+  }, [groups, selectedGroup]);
 
   const handleRemove = (e: MouseEvent, group: string) => {
     e.stopPropagation();
@@ -70,7 +78,7 @@ export function GroupSelector({
           >
             <div className="menu-modal__group__dropdown-inner">
               <div className="menu-modal__group__scroll">
-                {groups.map((group) => {
+                {orderedGroups.map((group) => {
                   const isActive = group === selectedGroup;
                   return (
                     <div

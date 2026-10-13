@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useModal } from '../providers/ModalProvider';
 import TeacherModal from '../modals/TeacherModal';
+import '../styles/TeacherLink.css';
 import type { MouseEvent, ReactNode } from 'react';
 
 interface TeacherLinkProps {

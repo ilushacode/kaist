@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '../hooks/useStore';
 import { useModal } from '../providers/ModalProvider';
 import MenuModal from '../modals/MenuModal';
+import GroupModal from '../modals/GroupModal';
 import { useNavigate } from 'react-router-dom';
 import { SPRING_FAST, TITLE_TRANSITION } from '../animations/presets';
 import '../styles/Header.css';
@@ -25,6 +26,10 @@ export const HeaderComponent = ({ title, backButton }: HeaderComponentProps) => 
     openModal(MenuModal, {});
   };
 
+  const handleGroupClick = () => {
+    openModal(GroupModal, {});
+  };
+
   const Icon = backButton ? X : Menu;
 
   return (
@@ -44,15 +49,19 @@ export const HeaderComponent = ({ title, backButton }: HeaderComponentProps) => 
         </AnimatePresence>
 
         {selectedGroup && (
-          <motion.div
+          <motion.button
+            type="button"
             className="header__group"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
+            onClick={handleGroupClick}
+            aria-label={`Открыть список групп. Текущая: ${selectedGroup}`}
+            whileTap={{ scale: 0.96 }}
           >
             <Users size={14} strokeWidth={2.2} />
             <span className="header__group__num">{selectedGroup}</span>
-          </motion.div>
+          </motion.button>
         )}
       </div>
 

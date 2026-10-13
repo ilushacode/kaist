@@ -2,8 +2,6 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './dev/resetApp';
 import './index.css';
-import './styles/TeacherLink.css';
-import './styles/TeacherLesson.css';
 import App from './App';
 import { ModalProvider } from './providers/ModalProvider';
 import { HashRouter } from 'react-router-dom';
