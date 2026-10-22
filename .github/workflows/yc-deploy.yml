@@ -1,0 +1,34 @@
+name: Deploy to Yandex S3
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload to Yandex Object Storage
+        uses: povetek/yandex-object-storage-action@v3
+        with:
+          access-key-id: ${{ secrets.YC_ACCESS_KEY_ID }}
+          secret-access-key: ${{ secrets.YC_SECRET_ACCESS_KEY }}
+          bucket: ${{ secrets.YC_BUCKET }}
+          path: dist
+          clear: true
