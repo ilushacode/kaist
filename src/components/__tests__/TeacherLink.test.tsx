@@ -1,21 +1,23 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TeacherLink } from '../TeacherLink';
 import { useModal } from '../../providers/ModalProvider';
 
-jest.mock('../../providers/ModalProvider', () => ({
-  useModal: jest.fn(),
+vi.mock('../../providers/ModalProvider', () => ({
+  useModal: vi.fn(),
 }));
 
-const mockedUseModal = useModal as jest.MockedFunction<typeof useModal>;
+import type { MockedFunction } from 'vitest';
+const mockedUseModal = useModal as unknown as MockedFunction<typeof useModal>;
 
 describe('TeacherLink', () => {
-  const openModal = jest.fn();
+  const openModal = vi.fn();
 
   beforeEach(() => {
     openModal.mockClear();
     mockedUseModal.mockReturnValue({
       openModal,
-      closeModal: jest.fn(),
+      closeModal: vi.fn(),
     });
   });
 
@@ -55,7 +57,7 @@ describe('TeacherLink', () => {
   });
 
   it('не всплывает клик наверх (stopPropagation)', () => {
-    const parentClick = jest.fn();
+    const parentClick = vi.fn();
     render(
       <div onClick={parentClick}>
         <TeacherLink teacher="X" display="X" />

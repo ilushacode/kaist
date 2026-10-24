@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { useStore } from '../useStore';
 
 beforeEach(async () => {
@@ -7,9 +8,7 @@ beforeEach(async () => {
 describe('useStore', () => {
   describe('addGroup', () => {
     it('добавляет группу, если она есть в кэше', () => {
-      useStore.setState({
-        scheduleGroups: { '3439': [] },
-      });
+      useStore.setState({ scheduleGroups: { '3439': [] } });
       useStore.getState().addGroup('3439');
       expect(useStore.getState().groups).toContain('3439');
       expect(useStore.getState().selectedGroup).toBe('3439');
@@ -71,7 +70,8 @@ describe('useStore', () => {
   });
 
   describe('setScheduleCache', () => {
-    it('устанавливает кэш расписания', () => {
+    it('устанавливает кэш расписания и снимает флаги', () => {
+      useStore.setState({ scheduleLoading: true, scheduleError: true });
       useStore.getState().setScheduleCache({
         groups: { '3439': [] },
         contentHash: 'abc',
@@ -82,6 +82,40 @@ describe('useStore', () => {
       expect(state.scheduleHash).toBe('abc');
       expect(state.scheduleLoading).toBe(false);
       expect(state.scheduleError).toBe(false);
+    });
+  });
+
+  describe('setExamsCache', () => {
+    it('устанавливает кэш экзаменов и снимает флаги', () => {
+      useStore.setState({ examsLoading: true, examsError: true });
+      useStore.getState().setExamsCache({
+        groups: { '3439': [] },
+        contentHash: 'h1',
+        updatedAt: '2026-10-24T00:00:00Z',
+      });
+      const state = useStore.getState();
+      expect(state.examsGroups).toEqual({ '3439': [] });
+      expect(state.examsHash).toBe('h1');
+      expect(state.examsLoading).toBe(false);
+      expect(state.examsError).toBe(false);
+    });
+  });
+
+  describe('setStudentsCache', () => {
+    it('устанавливает кэш студентов и снимает флаги', () => {
+      useStore.setState({ studentsLoading: true, studentsError: true });
+      useStore.getState().setStudentsCache({
+        groups: {
+          '3439': [{ student_id: 1, student: 'Иванов Иван', leader: false }],
+        },
+        contentHash: 'h2',
+        updatedAt: '2026-10-24T00:00:00Z',
+      });
+      const state = useStore.getState();
+      expect(Object.keys(state.studentsGroups)).toEqual(['3439']);
+      expect(state.studentsHash).toBe('h2');
+      expect(state.studentsLoading).toBe(false);
+      expect(state.studentsError).toBe(false);
     });
   });
 
@@ -97,6 +131,26 @@ describe('useStore', () => {
       const before = useStore.getState().bootstrapRetry;
       useStore.getState().retryBootstrap();
       expect(useStore.getState().bootstrapRetry).toBe(before + 1);
+    });
+  });
+
+  describe('resetAll', () => {
+    it('чистит состояние и install-banner ключи', async () => {
+      localStorage.setItem('install-banner-dismissed-until', '123');
+      localStorage.setItem('install-banner-installed', '1');
+      useStore.setState({
+        groups: ['3439'],
+        selectedGroup: '3439',
+        scheduleGroups: { '3439': [] },
+      });
+
+      await useStore.getState().resetAll();
+
+      expect(useStore.getState().groups).toEqual([]);
+      expect(useStore.getState().selectedGroup).toBeNull();
+      expect(useStore.getState().scheduleGroups).toEqual({});
+      expect(localStorage.getItem('install-banner-dismissed-until')).toBeNull();
+      expect(localStorage.getItem('install-banner-installed')).toBeNull();
     });
   });
 });

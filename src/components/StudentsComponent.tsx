@@ -1,97 +1,79 @@
 import { Star } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { fetchStudents } from '../api/students';
+import { useMemo } from 'react';
 import { useStore } from '../hooks/useStore';
-import { isCancelError } from '../api/client';
 import Loader from './LoaderComponent';
 import { usePrefetchImage } from '../hooks/usePrefetchImage';
-import type { Student } from '../types';
 import '../styles/Students.css';
 
 const ERROR_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_error.png`;
 
 export const StudentsComponent = () => {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
   const selectedGroup = useStore((s) => s.selectedGroup);
+  const studentsGroups = useStore((s) => s.studentsGroups);
+  const studentsError = useStore((s) => s.studentsError);
+  const studentsLoading = useStore((s) => s.studentsLoading);
+  const retryBootstrap = useStore((s) => s.retryBootstrap);
+
   usePrefetchImage(ERROR_IMAGE_SRC);
 
-  useEffect(() => {
-    if (!selectedGroup) return;
+  const students = useMemo(() => {
+    if (!selectedGroup) return [];
+    return studentsGroups[selectedGroup] ?? [];
+  }, [studentsGroups, selectedGroup]);
 
-    let cancelled = false;
-    const controller = new AbortController();
+  if (studentsLoading && students.length === 0 && !studentsError) {
+    return (
+      <div className="students__centred">
+        <Loader color={'#a8bcdd'} stroke={3} />
+      </div>
+    );
+  }
 
-    async function fetchData() {
-      setLoading(true);
-      setError(false);
-      setStudents([]);
-      try {
-        const result = await fetchStudents(selectedGroup!, {
-          signal: controller.signal,
-        });
-        if (cancelled) return;
-        setStudents(result);
-      } catch (err) {
-        if (cancelled || isCancelError(err)) return;
-        console.error('students:', err);
-        setStudents([]);
-        setError(true);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
+  if (studentsError && students.length === 0) {
+    return (
+      <div className="students__centred">
+        <img
+          src={ERROR_IMAGE_SRC}
+          alt="Гусь спит"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+          className="schedule__empty-image"
+        />
+        <p className="schedule__empty-title">Произошла ошибка</p>
+        <p className="schedule__empty-subtitle">
+          Проверьте соединение или попробуйте позже
+        </p>
+        <button type="button" className="teachers__retry" onClick={retryBootstrap}>
+          Повторить
+        </button>
+      </div>
+    );
+  }
 
-    void fetchData();
-
-    return () => {
-      cancelled = true;
-      controller.abort();
-    };
-  }, [selectedGroup]);
+  if (students.length === 0) {
+    return (
+      <div className="students__centred">
+        <p className="students__empty">Нет результатов</p>
+      </div>
+    );
+  }
 
   return (
     <div className="students">
-      {loading ? (
-        <div className="students__centred">
-          <Loader color={'#a8bcdd'} stroke={3} />
-        </div>
-      ) : error ? (
-        <div className="students__centred">
-          <img
-            src={ERROR_IMAGE_SRC}
-            alt="Гусь спит"
-            loading="eager"
-            decoding="async"
-            fetchPriority="high"
-            className="schedule__empty-image"
-          />
-          <p className="schedule__empty-title">Произошла ошибка</p>
-          <p className="schedule__empty-subtitle">
-            Проверьте соединение или попробуйте позже
-          </p>
-        </div>
-      ) : students.length > 0 ? (
-        students.map((student, i) => (
-          <div className="students__item" key={student.student_id ?? i}>
-            <div className="students__item__left">
-              <p className="students__item__left__num">{i + 1}.</p>
-            </div>
-            <div className="students__item__content">
-              <p className="students__item__content__name">{student.student}</p>
-            </div>
-            <div className="students__item__right">
-              {student.leader && <Star strokeWidth={3} />}
-            </div>
+      {students.map((student, i) => (
+        <div className="students__item" key={student.student_id ?? i}>
+          <div className="students__item__left">
+            <p className="students__item__left__num">{i + 1}.</p>
           </div>
-        ))
-      ) : (
-        <div className="students__centred">
-          <p className="students__empty">Нет результатов</p>
+          <div className="students__item__content">
+            <p className="students__item__content__name">{student.student}</p>
+          </div>
+          <div className="students__item__right">
+            {student.leader && <Star strokeWidth={3} />}
+          </div>
         </div>
-      )}
+      ))}
     </div>
   );
 };

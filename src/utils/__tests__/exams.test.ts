@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { getExamsForGroup } from '../exams';
 import type { GroupExamRaw } from '../../types';
 

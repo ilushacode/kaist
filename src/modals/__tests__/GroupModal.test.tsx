@@ -1,32 +1,34 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import GroupModal from '../GroupModal';
 import { useStore } from '../../hooks/useStore';
 import { useModal } from '../../providers/ModalProvider';
 
-jest.mock('../../hooks/useStore', () => ({
-  useStore: jest.fn(),
+vi.mock('../../hooks/useStore', () => ({
+  useStore: vi.fn(),
 }));
 
-jest.mock('../../providers/ModalProvider', () => ({
-  useModal: jest.fn(),
+vi.mock('../../providers/ModalProvider', () => ({
+  useModal: vi.fn(),
 }));
 
-const mockedUseStore = useStore as jest.MockedFunction<typeof useStore>;
-const mockedUseModal = useModal as jest.MockedFunction<typeof useModal>;
+import type { MockedFunction } from 'vitest';
+const mockedUseStore = useStore as unknown as MockedFunction<typeof useStore>;
+const mockedUseModal = useModal as unknown as MockedFunction<typeof useModal>;
 
 interface MockState {
   groups: string[];
   selectedGroup: string | null;
-  selectGroup: jest.Mock;
-  removeGroup: jest.Mock;
+  selectGroup: ReturnType<typeof vi.fn>;
+  removeGroup: ReturnType<typeof vi.fn>;
 }
 
 function mockStore(overrides: Partial<MockState> = {}): MockState {
   const state: MockState = {
     groups: ['3439'],
     selectedGroup: '3439',
-    selectGroup: jest.fn(),
-    removeGroup: jest.fn(),
+    selectGroup: vi.fn(),
+    removeGroup: vi.fn(),
     ...overrides,
   };
   mockedUseStore.mockImplementation(((selector: (s: MockState) => unknown) =>
@@ -35,8 +37,8 @@ function mockStore(overrides: Partial<MockState> = {}): MockState {
 }
 
 describe('GroupModal', () => {
-  const openModal = jest.fn();
-  const closeModal = jest.fn();
+  const openModal = vi.fn();
+  const closeModal = vi.fn();
 
   beforeEach(() => {
     openModal.mockClear();

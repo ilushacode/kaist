@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import {
   startOfDay,
   compareDay,
@@ -73,7 +74,6 @@ describe('shiftDate', () => {
 
 describe('getMondayOfWeek', () => {
   it('для понедельника возвращает его же', () => {
-    // 6 января 2025 — понедельник
     const monday = getMondayOfWeek(new Date(2025, 0, 6));
     expect(formatISO(monday)).toBe('2025-01-06');
   });

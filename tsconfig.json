@@ -16,11 +16,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["vite/client", "vite-plugin-pwa/client", "jest", "node"],
+    "types": ["vite/client", "vite-plugin-pwa/client", "vitest/globals", "node"],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "jest.setup.ts"],
+  "include": ["src", "vitest.config.ts", "vitest.setup.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

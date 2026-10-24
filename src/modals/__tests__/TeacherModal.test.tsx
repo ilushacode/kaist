@@ -1,12 +1,14 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import TeacherModal from '../TeacherModal';
 import { useStore } from '../../hooks/useStore';
 
-jest.mock('../../hooks/useStore', () => ({
-  useStore: jest.fn(),
+vi.mock('../../hooks/useStore', () => ({
+  useStore: vi.fn(),
 }));
 
-const mockedUseStore = useStore as jest.MockedFunction<typeof useStore>;
+import type { MockedFunction } from 'vitest';
+const mockedUseStore = useStore as unknown as MockedFunction<typeof useStore>;
 
 interface MockState {
   scheduleGroups: Record<string, unknown[]>;
@@ -29,13 +31,12 @@ function mockStore(overrides: Partial<MockState> = {}) {
 
 describe('TeacherModal', () => {
   beforeEach(() => {
-    // Понедельник 8 сентября 2025, 12:00 - до начала недели.
-    jest.useFakeTimers({ now: new Date(2025, 8, 8, 12, 0, 0) });
+    vi.useFakeTimers({ now: new Date(2025, 8, 8, 12, 0, 0) });
   });
 
   afterEach(() => {
-    jest.useRealTimers();
-    jest.clearAllMocks();
+    vi.useRealTimers();
+    vi.clearAllMocks();
   });
 
   it('показывает загрузчик при loading', () => {

@@ -28,6 +28,37 @@ export interface GroupExamRaw {
   dates?: string[];
 }
 
+export interface ApiMeta {
+  contentHash?: string;
+  updatedAt?: string;
+  groupsCount?: number;
+  itemsCount?: number;
+}
+
+export interface ScheduleResponse {
+  meta?: ApiMeta;
+  groups?: Record<string, GroupScheduleLesson[]>;
+}
+
+export interface ExamsResponse {
+  meta?: ApiMeta;
+  groups?: Record<string, GroupExamRaw[]>;
+}
+
+export interface StudentsResponse {
+  meta?: ApiMeta;
+  students?: Record<string, Student[]>;
+}
+
+export interface HashesResponse {
+  hashes?: {
+    schedule?: string;
+    exams?: string;
+    students?: string;
+    ads?: string;
+  };
+}
+
 export interface ScheduleData {
   groups: Record<string, GroupScheduleLesson[]>;
   contentHash: string | null;
@@ -36,6 +67,12 @@ export interface ScheduleData {
 
 export interface ExamsData {
   groups: Record<string, GroupExamRaw[]>;
+  contentHash: string | null;
+  updatedAt: string | null;
+}
+
+export interface StudentsData {
+  groups: Record<string, Student[]>;
   contentHash: string | null;
   updatedAt: string | null;
 }
@@ -68,7 +105,8 @@ export interface AdsData {
 export interface Student {
   student_id: number | string;
   student: string;
-  group: string;
+  /** Необязательно: в новом API студенты сгруппированы по номеру группы. */
+  group?: string;
   leader: boolean;
 }
 

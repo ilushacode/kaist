@@ -149,9 +149,6 @@ export const TeachersComponent = () => {
 
   return (
     <div className="teachers">
-      {/* Фиксированный по высоте блок: заголовок и поле поиска —
-          два перекрывающихся слоя. При открытии поиска заголовок уезжает
-          вверх, поле приезжает снизу, список под ним не сдвигается. */}
       <div className="teachers__toolbar">
         <AnimatePresence initial={false} mode="sync">
           {!searchOpen && (
@@ -214,7 +211,6 @@ export const TeachersComponent = () => {
         </AnimatePresence>
       </div>
 
-      {/* Скроллируемая область: либо список группы, либо результаты поиска. */}
       <div className="teachers__list">
         <AnimatePresence initial={false} mode="popLayout">
           {showGroupList && teachers.length > 0 && (

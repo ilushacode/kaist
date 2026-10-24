@@ -1,8 +1,15 @@
-import { ADS_URL } from '../config';
+import { API_BASE } from '../config';
 import { fetchJson } from './client';
 import type { AdRaw, AdsData } from '../types';
 
-const hashList = (list: AdRaw[]): string => {
+const ADS_PATH = '/data/ads';
+
+/**
+ * Реклама загружается вручную — сервер отдаёт просто массив объявлений
+ * без метаданных. Локальный хэш нужен только для сравнения «изменилось / нет»
+ * на клиенте (сервер хэш рекламы не отдаёт).
+ */
+const localHash = (list: AdRaw[]): string => {
   const json = JSON.stringify(list);
   let h = 5381;
   for (let i = 0; i < json.length; i++) {
@@ -15,11 +22,11 @@ export const fetchAdsData = async (
   options: { signal?: AbortSignal; timeout?: number } = {}
 ): Promise<AdsData> => {
   try {
-    const data = await fetchJson<AdRaw[]>(ADS_URL, options);
+    const data = await fetchJson<AdRaw[]>(`${API_BASE}${ADS_PATH}`, options);
     const list = Array.isArray(data) ? data : [];
     return {
       list,
-      contentHash: hashList(list),
+      contentHash: localHash(list),
       updatedAt: new Date().toISOString(),
     };
   } catch (err) {

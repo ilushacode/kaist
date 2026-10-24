@@ -13,8 +13,8 @@ const ERROR_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_error.png`;
 export const ExamsComponent = () => {
   const selectedGroup = useStore((s) => s.selectedGroup);
   const examsGroups = useStore((s) => s.examsGroups);
-  const scheduleError = useStore((s) => s.scheduleError);
-  const scheduleLoading = useStore((s) => s.scheduleLoading);
+  const examsError = useStore((s) => s.examsError);
+  const examsLoading = useStore((s) => s.examsLoading);
   const retryBootstrap = useStore((s) => s.retryBootstrap);
 
   usePrefetchImage(EMPTY_IMAGE_SRC);
@@ -25,7 +25,7 @@ export const ExamsComponent = () => {
     [examsGroups, selectedGroup]
   );
 
-  if (scheduleLoading && exams.length === 0 && !scheduleError) {
+  if (examsLoading && exams.length === 0 && !examsError) {
     return (
       <div className="exams__centred">
         <Loader color={'#a8bcdd'} stroke={3} />
@@ -33,7 +33,7 @@ export const ExamsComponent = () => {
     );
   }
 
-  if (scheduleError && exams.length === 0) {
+  if (examsError && exams.length === 0) {
     return (
       <ExamEmpty
         title="Произошла ошибка"

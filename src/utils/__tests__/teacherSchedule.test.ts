@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import {
   buildTeacherLessons,
   getTeacherLessonsForDate,
@@ -42,7 +43,6 @@ describe('buildTeacherLessons', () => {
 
   it('находит занятия преподавателя во всех группах', () => {
     const refs = buildTeacherLessons(TEACHER, scheduleGroups, null);
-    // 3 занятия в 3439 + 2 в 3440 = 5
     expect(refs).toHaveLength(5);
     expect(refs.every((r) => r.lesson.p === TEACHER)).toBe(true);
   });
@@ -73,7 +73,6 @@ describe('buildTeacherLessons', () => {
 
 describe('getTeacherLessonsForDate', () => {
   const refs = buildTeacherLessons(TEACHER, scheduleGroups, examsGroups);
-  // Понедельник 15 сентября 2025 — чётная неделя, Матан с ds:['чет'] попадает.
   const monday = new Date(2025, 8, 15);
   monday.setHours(0, 0, 0, 0);
 
@@ -85,7 +84,6 @@ describe('getTeacherLessonsForDate', () => {
   });
 
   it('возвращает [] для дня без пар', () => {
-    // Суббота той же чётной недели — у преподавателя пар нет.
     const saturday = new Date(2025, 8, 20);
     saturday.setHours(0, 0, 0, 0);
     expect(getTeacherLessonsForDate(refs, saturday)).toEqual([]);
@@ -97,7 +95,6 @@ describe('getTeacherLessonsForDate', () => {
   });
 
   it('сортирует по времени', () => {
-    // Вторник 16 сентября 2025 — Физика без ds попадает.
     const tuesday = new Date(2025, 8, 16);
     tuesday.setHours(0, 0, 0, 0);
     const result = getTeacherLessonsForDate(refs, tuesday);

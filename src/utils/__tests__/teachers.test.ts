@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { collectAllTeachers, collectTeachers, searchTeachers } from '../teachers';
 import type { GroupExamRaw, GroupScheduleLesson, TeacherEntry } from '../../types';
 

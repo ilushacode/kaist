@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { capitalizeName, formatBuilding } from '../string';
 
 describe('capitalizeName', () => {

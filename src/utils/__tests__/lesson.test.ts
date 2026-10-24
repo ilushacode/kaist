@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { getLessonType, getLessonTypeLabel, LESSON_TYPE_LABELS } from '../lesson';
 
 describe('getLessonType', () => {
