@@ -1,9 +1,11 @@
+import { useCallback, useEffect, useRef } from 'react';
 import { Menu, X, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStore } from '../hooks/useStore';
 import { useModal } from '../providers/ModalProvider';
 import MenuModal from '../modals/MenuModal';
 import GroupModal from '../modals/GroupModal';
+import DebugModal from '../modals/DebugModal';
 import { useNavigate } from 'react-router-dom';
 import { SPRING_FAST, TITLE_TRANSITION } from '../animations/presets';
 import '../styles/Header.css';
@@ -13,10 +15,50 @@ interface HeaderComponentProps {
   backButton?: boolean;
 }
 
+/** 5 кликов подряд с интервалом не больше этого — открываем отладку. */
+const DEBUG_TAP_COUNT = 5;
+const DEBUG_TAP_WINDOW_MS = 2000;
+
 export const HeaderComponent = ({ title, backButton }: HeaderComponentProps) => {
   const selectedGroup = useStore((s) => s.selectedGroup);
   const { openModal } = useModal();
   const navigate = useNavigate();
+
+  const tapCountRef = useRef(0);
+  const firstTapAtRef = useRef(0);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    };
+  }, []);
+
+  const handleTitleClick = useCallback(() => {
+    const now = Date.now();
+    if (now - firstTapAtRef.current > DEBUG_TAP_WINDOW_MS) {
+      tapCountRef.current = 0;
+      firstTapAtRef.current = now;
+    }
+
+    tapCountRef.current += 1;
+
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    resetTimerRef.current = setTimeout(() => {
+      tapCountRef.current = 0;
+      firstTapAtRef.current = 0;
+    }, DEBUG_TAP_WINDOW_MS);
+
+    if (tapCountRef.current >= DEBUG_TAP_COUNT) {
+      tapCountRef.current = 0;
+      firstTapAtRef.current = 0;
+      if (resetTimerRef.current) {
+        clearTimeout(resetTimerRef.current);
+        resetTimerRef.current = null;
+      }
+      openModal(DebugModal, {});
+    }
+  }, [openModal]);
 
   const handleRightClick = () => {
     if (backButton) {
@@ -43,6 +85,7 @@ export const HeaderComponent = ({ title, backButton }: HeaderComponentProps) => 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={TITLE_TRANSITION}
+            onClick={handleTitleClick}
           >
             {title}
           </motion.h1>
