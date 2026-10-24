@@ -13,8 +13,8 @@ export const ScheduleEmpty = memo(function ScheduleEmpty({
   subtitle,
   onRetry,
 }: ScheduleEmptyProps) {
-  return (
-    <div className="schedule">
+  if (onRetry) {
+    return (
       <div className="schedule--centered">
         <img
           src={EMPTY_IMAGE_SRC}
@@ -26,12 +26,31 @@ export const ScheduleEmpty = memo(function ScheduleEmpty({
         />
         <p className="schedule__empty-title">{title}</p>
         <p className="schedule__empty-subtitle">{subtitle}</p>
-        {onRetry && (
-          <button type="button" className="schedule__retry" onClick={onRetry}>
-            Повторить
-          </button>
-        )}
+        <button type="button" className="schedule__retry" onClick={onRetry}>
+          Повторить
+        </button>
       </div>
+    );
+  }
+
+  return (
+    <div className="schedule-empty">
+      <h2 className="schedule-empty__title">{title}</h2>
+
+      <div className="schedule-empty__illustration-wrap">
+        <div className="schedule-empty__illustration">
+          <img
+            src={EMPTY_IMAGE_SRC}
+            alt="Гусь спит"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            className="schedule-empty__image"
+          />
+        </div>
+      </div>
+
+      <div className="schedule-empty__bubble">{subtitle}</div>
     </div>
   );
 });
