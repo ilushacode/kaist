@@ -8,8 +8,8 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: null, // регистрируем SW вручную через virtual:pwa-register
+      registerType: 'prompt',
+      injectRegister: null,
 
       includeAssets: [
         'favicon.ico',
@@ -26,7 +26,6 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         lang: 'ru',
-        // start_url и scope не задаём — VitePWA подставит base
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
@@ -45,10 +44,8 @@ export default defineConfig({
         ],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true,
-        skipWaiting: true,
+        skipWaiting: true, // Важно: разрешаем новому SW брать управление
         clientsClaim: true,
-        // navigateFallback не задаём — VitePWA подставит
-
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.destination === 'image',
