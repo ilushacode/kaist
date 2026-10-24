@@ -75,7 +75,7 @@
     <!-- /Yandex.Metrika counter -->
     <meta name="yandex-verification" content="1c95d39b3a97ecde" />
 
-    <meta name="theme-color" content="#f2f5fb" />
+    <meta name="theme-color" content="#f2f5fb" id="dynamic-theme-color" />
 
     <script>
       (function () {
@@ -86,42 +86,19 @@
             (stored === 'auto' &&
               window.matchMedia('(prefers-color-scheme: dark)').matches);
           var resolved = isDark ? 'dark' : 'light';
-          document.documentElement.dataset.theme = resolved;
-          document.documentElement.style.colorScheme = resolved;
-        } catch (e) {}
-      })();
-    </script>
-
-    <meta name="theme-color" content="#f2f5fb" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#0f1216" media="(prefers-color-scheme: dark)">
-
-    <meta name="theme-color" content="#f2f5fb" id="dynamic-theme-color">
-
-    <script>
-      (function () {
-        try {
-          var stored = localStorage.getItem('theme') || 'auto';
-          var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          
-          var isDark = stored === 'dark' || (stored === 'auto' && systemDark);
           var resolvedColor = isDark ? '#0f1216' : '#f2f5fb';
 
-          document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
-          document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+          document.documentElement.dataset.theme = resolved;
+          document.documentElement.style.colorScheme = resolved;
 
           var meta = document.getElementById('dynamic-theme-color');
           if (meta) {
             meta.setAttribute('content', resolvedColor);
           }
-
-          if (stored !== 'auto') {
-            document.querySelectorAll('meta[name="theme-color"][media]').forEach(function (el) {
-              el.remove();
-            });
-          }
         } catch (e) {}
       })();
     </script>
+
   </head>
   <body>
     <noscript>

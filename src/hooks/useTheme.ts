@@ -30,17 +30,27 @@ export const useTheme = (): 'light' | 'dark' => {
       root.dataset.theme = resolved;
       root.style.colorScheme = resolved;
       
-      const meta = document.getElementById('dynamic-theme-color') as HTMLMetaElement | null;
-      if (meta) {
-        meta.setAttribute('content', resolved === 'dark' ? '#0f1216' : '#f2f5fb');
+      const backgroundColor =
+        window.getComputedStyle(root).getPropertyValue('--background-color').trim() ||
+        (resolved === 'dark' ? '#0f1216' : '#f2f5fb');
+
+      // Replace the node so mobile browsers re-read the theme color reliably.
+      const currentMeta = document.getElementById('dynamic-theme-color');
+      const meta = document.createElement('meta');
+      meta.name = 'theme-color';
+      meta.id = 'dynamic-theme-color';
+      meta.content = backgroundColor;
+      if (currentMeta) {
+        currentMeta.replaceWith(meta);
+      } else {
+        document.head.appendChild(meta);
       }
     };
 
-    if (!prev) {
+    if (!prev || prev === resolved) {
       apply();
       return;
     }
-    if (prev === resolved) return;
 
     const docWithVT = document as Document & {
       startViewTransition?: (cb: () => void) => void;

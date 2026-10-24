@@ -55,6 +55,8 @@ html, body, #root {
   width: 100%;
   font-family: "Ubuntu", sans-serif;
   overflow: hidden;
+  background-color: var(--background-color);
+  color: var(--font-color);
 }
 
 

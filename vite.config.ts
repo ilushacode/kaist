@@ -22,8 +22,8 @@ export default defineConfig({
         name: 'КАИСТ',
         short_name: 'КАИСТ',
         description: 'Расписание для студентов КАИ',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
+        theme_color: '#f2f5fb',
+        background_color: '#f2f5fb',
         display: 'standalone',
         lang: 'ru',
         icons: [
