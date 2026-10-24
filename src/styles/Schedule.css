@@ -295,19 +295,16 @@
   z-index: 1;
 }
 
-/* Заголовок над гусём — поднят выше */
 .schedule-empty__title {
   font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: -0.025em;
   line-height: 1.15;
   color: var(--font-color);
-  margin-top: 1rem;
-  margin-bottom: 5rem;
+  margin: 0 0 3rem;
   text-align: center;
 }
 
-/* Круг с гусём */
 .schedule-empty__illustration-wrap {
   position: relative;
   width: 220px;
@@ -331,6 +328,7 @@
   pointer-events: none;
 }
 
+/* Контейнер картинки: размер и позиция не меняются */
 .schedule-empty__illustration {
   width: 100%;
   height: 100%;
@@ -341,9 +339,24 @@
   box-shadow:
     0 12px 36px -12px color-mix(in srgb, var(--primary-color) 40%, transparent),
     0 4px 12px -4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: box-shadow 0.45s ease;
+}
+
+.schedule-empty__illustration--locked {
+  cursor: default;
+}
+
+.schedule-empty__illustration--awake {
+  box-shadow:
+    0 16px 44px -12px color-mix(in srgb, var(--primary-color) 50%, transparent),
+    0 6px 16px -6px rgba(0, 0, 0, 0.12);
 }
 
 .schedule-empty__image {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -351,14 +364,30 @@
   display: block;
   user-select: none;
   -webkit-user-drag: none;
+  transition: opacity 0.55s ease-in-out;
+  will-change: opacity;
 }
 
-/* Баббл с цитатой (наклонный, как раньше) */
+.schedule-empty__image--sleep {
+  opacity: 1;
+}
+
+.schedule-empty__image--sleep.schedule-empty__image--hidden {
+  opacity: 0;
+}
+
+.schedule-empty__image--awake {
+  opacity: 0;
+}
+
+.schedule-empty__image--awake.schedule-empty__image--visible {
+  opacity: 1;
+}
+
 .schedule-empty__bubble {
   position: relative;
   max-width: 22rem;
   padding: 1.15rem 1.35rem 1.25rem;
-  margin-top: 1rem;
   border-radius: 1.25rem;
   background-color: color-mix(in srgb, var(--accent-background-color) 90%, transparent);
   border: 1px solid color-mix(in srgb, var(--primary-color) 15%, transparent);
@@ -367,7 +396,7 @@
   line-height: 1.45;
   font-weight: 500;
   box-shadow: 0 4px 20px -8px rgba(0, 0, 0, 0.12);
-  transform: rotate(-2deg);
+  transform: rotate(-1.5deg);
   transition: transform 0.25s ease;
   text-align: center;
 }
@@ -376,7 +405,6 @@
   transform: rotate(0deg);
 }
 
-/* Хвостик баббла слева сверху */
 .schedule-empty__bubble::before {
   content: "";
   position: absolute;
@@ -390,7 +418,6 @@
   transform: rotate(45deg);
 }
 
-/* Кавычка-акцент справа */
 .schedule-empty__bubble::after {
   content: "“";
   position: absolute;
