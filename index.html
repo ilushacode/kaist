@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
@@ -85,6 +88,37 @@
           var resolved = isDark ? 'dark' : 'light';
           document.documentElement.dataset.theme = resolved;
           document.documentElement.style.colorScheme = resolved;
+        } catch (e) {}
+      })();
+    </script>
+
+    <meta name="theme-color" content="#f2f5fb" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f1216" media="(prefers-color-scheme: dark)">
+
+    <meta name="theme-color" content="#f2f5fb" id="dynamic-theme-color">
+
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme') || 'auto';
+          var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          
+          var isDark = stored === 'dark' || (stored === 'auto' && systemDark);
+          var resolvedColor = isDark ? '#0f1216' : '#f2f5fb';
+
+          document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
+          document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+
+          var meta = document.getElementById('dynamic-theme-color');
+          if (meta) {
+            meta.setAttribute('content', resolvedColor);
+          }
+
+          if (stored !== 'auto') {
+            document.querySelectorAll('meta[name="theme-color"][media]').forEach(function (el) {
+              el.remove();
+            });
+          }
         } catch (e) {}
       })();
     </script>
