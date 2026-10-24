@@ -1,7 +1,7 @@
 {
-  "name": "kaist-app",
+  "name": "kaist",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.14.13",
-    "@vercel/analytics": "^2.0.1",
     "localforage": "^1.10.0",
     "lucide-react": "^1.48.0",
     "motion": "^13.4.3",

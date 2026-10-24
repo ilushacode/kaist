@@ -6,7 +6,6 @@ import { ModalProvider } from './providers/ModalProvider';
 import { HashRouter } from 'react-router-dom';
 import { PhoneFrame } from './components/PhoneFrameComponent';
 import { registerSW } from 'virtual:pwa-register';
-import { Analytics } from '@vercel/analytics/react';
 import { UpdateBanner } from './components/UpdateBanner';
 
 let updateSW: (reloadPage?: boolean) => Promise<void>;
@@ -34,7 +33,6 @@ function Root() {
       <HashRouter>
         <ModalProvider>
           <App />
-          <Analytics />
           {needRefresh && <UpdateBanner onUpdate={handleUpdate} />}
         </ModalProvider>
       </HashRouter>
