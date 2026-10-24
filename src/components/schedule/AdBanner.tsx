@@ -7,6 +7,34 @@ import '../../styles/AdBanner.css';
 
 const SPRING = { type: 'spring', stiffness: 400, damping: 36, mass: 0.6 } as const;
 
+function openExternal(url: string): void {
+  if (!url) return;
+
+  try {
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    // Некоторые webview требуют, чтобы ссылка была в DOM перед кликом.
+    a.style.position = 'fixed';
+    a.style.left = '-9999px';
+    a.style.top = '0';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    return;
+  } catch {
+    /* пробуем fallback ниже */
+  }
+
+  try {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  } catch {
+    /* последний шанс — перейти в текущем окне */
+    window.location.href = url;
+  }
+}
+
 interface AdBannerProps {
   adsRaw: AdRaw[];
   group: string | null;
@@ -66,8 +94,19 @@ export const AdBanner = ({ adsRaw, group, today }: AdBannerProps) => {
 
   const handleClick = useCallback(() => {
     if (!ad?.link) return;
-    window.open(ad.link, '_blank', 'noopener,noreferrer');
+    openExternal(ad.link);
   }, [ad]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!ad?.link) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openExternal(ad.link);
+      }
+    },
+    [ad]
+  );
 
   const hasLink = Boolean(ad?.link);
   const visible = Boolean(ad) && imageReady;
@@ -82,8 +121,10 @@ export const AdBanner = ({ adsRaw, group, today }: AdBannerProps) => {
           animate={{ opacity: 1, y: 0, maxHeight: 200 }}
           exit={{ opacity: 0, y: -8, maxHeight: 0 }}
           transition={SPRING}
-          onClick={handleClick}
+          onClick={hasLink ? handleClick : undefined}
+          onKeyDown={hasLink ? handleKeyDown : undefined}
           role={hasLink ? 'link' : undefined}
+          tabIndex={hasLink ? 0 : undefined}
           title={ad.caption || undefined}
           style={{ cursor: hasLink ? 'pointer' : 'default' }}
         >
