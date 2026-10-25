@@ -130,10 +130,28 @@ export interface Exam {
   dates: string[];
 }
 
+/**
+ * Преподаватель + кафедры, предметы и группы, в которых он ведёт.
+ * `groups` нужен для поиска преподавателя по номеру группы.
+ */
 export interface TeacherEntry {
   teacher: string;
   departments: string[];
   subjects: string[];
+  groups: string[];
+}
+
+/** Студент с гарантированно известной группой (для поиска по всем группам). */
+export interface StudentEntry {
+  student: string;
+  group: string;
+  leader: boolean;
+}
+
+/** Результат поиска: найденный студент + причина совпадения. */
+export interface StudentSearchResult {
+  student: StudentEntry;
+  matchReason: 'name' | 'group';
 }
 
 export type Theme = 'auto' | 'light' | 'dark';

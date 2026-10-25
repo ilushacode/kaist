@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { StudentsComponent } from '../StudentsComponent';
 import { useStore } from '../../hooks/useStore';
 
@@ -71,5 +71,35 @@ describe('StudentsComponent', () => {
     mockStore({ studentsGroups: { '3439': [] } });
     render(<StudentsComponent />);
     expect(screen.getByText('Нет результатов')).toBeInTheDocument();
+  });
+
+  it('открывает поиск и находит студента по имени в другой группе', () => {
+    mockStore({
+      selectedGroup: '3439',
+      studentsGroups: {
+        '3439': [{ student_id: 1, student: 'Иванов Иван', leader: false }],
+        '3440': [{ student_id: 2, student: 'Сидоров Сидор', leader: false }],
+      },
+    });
+    render(<StudentsComponent />);
+    fireEvent.click(screen.getByLabelText('Открыть поиск'));
+    const input = screen.getByPlaceholderText('Имя студента или группа');
+    fireEvent.change(input, { target: { value: 'Сидоров' } });
+    expect(screen.getByText('Сидоров Сидор')).toBeInTheDocument();
+  });
+
+  it('находит студентов по номеру группы', () => {
+    mockStore({
+      selectedGroup: '3439',
+      studentsGroups: {
+        '3439': [{ student_id: 1, student: 'Иванов Иван', leader: false }],
+        '3440': [{ student_id: 2, student: 'Сидоров Сидор', leader: false }],
+      },
+    });
+    render(<StudentsComponent />);
+    fireEvent.click(screen.getByLabelText('Открыть поиск'));
+    const input = screen.getByPlaceholderText('Имя студента или группа');
+    fireEvent.change(input, { target: { value: '3440' } });
+    expect(screen.getByText('Сидоров Сидор')).toBeInTheDocument();
   });
 });

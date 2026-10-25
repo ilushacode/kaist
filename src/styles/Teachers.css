@@ -17,140 +17,7 @@
   min-height: 0;
 }
 
-/* ─── Тулбар: фиксированная высота, два слоя ─── */
-
-.teachers__toolbar {
-  position: relative;
-  flex-shrink: 0;
-  height: 3rem;
-  margin-bottom: 0.5rem;
-}
-
-.teachers__toolbar-layer {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  will-change: transform, opacity;
-}
-
-.teachers__toolbar-layer:first-child {
-  justify-content: space-between;
-}
-
-.teachers__toolbar-title {
-  flex: 1;
-  min-width: 0;
-  font-size: 0.68rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--light-font-color);
-  opacity: 0.75;
-  line-height: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.teachers__search-toggle {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  color: var(--light-font-color);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.15s ease, color 0.15s ease;
-  flex-shrink: 0;
-}
-
-.teachers__search-toggle:active {
-  background-color: color-mix(in srgb, var(--light-font-color) 15%, transparent);
-  color: var(--font-color);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .teachers__search-toggle:hover {
-    background-color: color-mix(in srgb, var(--light-font-color) 12%, transparent);
-    color: var(--font-color);
-  }
-}
-
-/* ─── Поле поиска ─── */
-
-.teachers__search-input-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-}
-
-.teachers__search-icon {
-  position: absolute;
-  left: 0.85rem;
-  color: var(--light-font-color);
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-.teachers__search-input {
-  width: 100%;
-  height: 100%;
-  font: inherit;
-  font-size: 1rem;
-  padding: 0 2.4rem 0 2.35rem;
-  border-radius: 0.85rem;
-  outline: none;
-  border: 1px solid color-mix(in srgb, var(--light-font-color) 18%, transparent);
-  background-color: color-mix(in srgb, var(--accent-background-color) 55%, transparent);
-  color: var(--font-color);
-  -webkit-tap-highlight-color: transparent;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
-  box-sizing: border-box;
-}
-
-.teachers__search-input::placeholder {
-  color: var(--light-font-color);
-  opacity: 0.6;
-}
-
-.teachers__search-input:focus {
-  border-color: color-mix(in srgb, var(--primary-color) 50%, transparent);
-  background-color: color-mix(in srgb, var(--accent-background-color) 80%, transparent);
-}
-
-.teachers__search-close {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  position: absolute;
-  right: 0.35rem;
-  width: 1.9rem;
-  height: 1.9rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  color: var(--light-font-color);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.teachers__search-close:active {
-  background-color: color-mix(in srgb, var(--light-font-color) 18%, transparent);
-  color: var(--font-color);
-}
-
-/* ─── Результаты поиска: без плашек, обычные строки с разделителями ─── */
+/* ─── Результаты поиска: обычные строки с разделителями ─── */
 
 .teachers__search-results {
   display: flex;
@@ -217,7 +84,6 @@
   gap: 0.25rem;
 }
 
-/* Имя — до двух строк, отчество видно. */
 .teachers__search-result__name {
   font-size: 0.95rem;
   font-weight: 500;
@@ -233,8 +99,12 @@
   overflow: hidden;
 }
 
-/* Кафедра — видна полностью, но мелкая и приглушённая. */
+/* Метаданные: группы + кафедра/предметы. */
 .teachers__search-result__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.7rem;
   font-weight: 500;
   text-transform: uppercase;
@@ -242,6 +112,21 @@
   color: var(--light-font-color);
   opacity: 0.75;
   line-height: 1.4;
+}
+
+.teachers__search-result__groups {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.35rem;
+  background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--primary-color);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.teachers__search-result__extra {
   overflow-wrap: break-word;
   word-break: break-word;
 }
@@ -380,7 +265,6 @@
   padding-top: 0.2rem;
 }
 
-/* Имя — до двух строк, чтобы отчество не скрывалось. */
 .teachers__name {
   font-size: 1rem;
   font-weight: 600;
@@ -475,4 +359,13 @@
   opacity: 0.5;
   margin-left: auto;
   padding-left: 0.5rem;
+}
+
+/* Центрированный лоадер/ошибка */
+
+.teachers__centred img.schedule__empty-image {
+  width: 60%;
+  max-width: 200px;
+  aspect-ratio: 1;
+  margin-bottom: 0.5rem;
 }

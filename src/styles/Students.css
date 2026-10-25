@@ -10,16 +10,29 @@
 
 .students {
   flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 1rem 2rem;
+  overflow: hidden;
+}
+
+/* ─── Список студентов ─── */
+
+.students__list {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  padding: 1rem;
-  padding-bottom: 2rem;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  padding-bottom: 0.5rem;
 }
-.students::-webkit-scrollbar {
+
+.students__list::-webkit-scrollbar {
   display: none;
 }
 
@@ -29,37 +42,57 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  padding-bottom: 15%;
+  text-align: center;
   animation: fadeIn 0.3s ease-out;
 }
 
 /* Карточка студента */
+
 .students__item {
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  padding: 0.85rem 1rem;
+  padding: 0.7rem 0.7rem 0.7rem 1rem;
   background-color: var(--accent-background-color);
   border-radius: 1.1rem;
   border: 1px solid transparent;
-  transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
-  animation: studentSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.2s ease;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
+  cursor: pointer;
+  position: relative;
 }
 
-/* Продавливание при тапе (мобильная замена hover) */
 .students__item:active {
   transform: scale(0.975);
   background-color: var(--background-color);
   border-color: var(--primary-color);
 }
 
-/* Левая часть (Номер) */
+.students__item--copied {
+  background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  border-color: color-mix(in srgb, var(--primary-color) 45%, transparent);
+}
+
+.students__item--leader {
+  background-color: color-mix(in srgb, var(--accent-background-color) 75%, transparent);
+}
+
+/* Левая часть — номер */
+
 .students__item__left {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 1.8rem;
 }
 
 .students__item__left__num {
@@ -81,17 +114,32 @@
   color: var(--background-color);
 }
 
-/* Центральная часть (Имя) */
+/* Чип группы в результатах поиска */
+
+.students__group-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.4rem;
+  background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--primary-color);
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Центральная часть — имя */
+
 .students__item__content {
   position: relative;
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  /* Переменная, которая меняется при :active */
-  --fade-color: var(--accent-background-color);
 }
 
-/* Сам текст */
 .students__item__content__name {
   font-size: 1rem;
   font-weight: 500;
@@ -99,11 +147,8 @@
   line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
-  /* Убираем троеточие, обрезаем ровно по краю */
   text-overflow: clip;
-  /* Небольшой отступ справа, чтобы текст не «упирался» в градиент вплотную */
   padding-right: 0.25rem;
-  /* Плавное затухание через маску — работает во всех современных браузерах */
   -webkit-mask-image: linear-gradient(
     to right,
     #000 0,
@@ -118,75 +163,123 @@
   );
 }
 
-/* Градиентный оверлей поверх правого края — подстраивается под фон карточки */
-.students__item__content::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 2rem;
-  pointer-events: none;
-  background: linear-gradient(
-    to right,
-    transparent,
-    var(--fade-color) 90%
-  );
-  transition: background 0.15s ease;
+.students__item__match {
+  font-size: 0.7rem;
+  color: var(--light-font-color);
+  opacity: 0.7;
+  margin: 0.15rem 0 0;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-/* Меняем цвет градиента при тапе, чтобы он совпадал с фоном карточки */
-.students__item:active .students__item__content {
-  --fade-color: var(--background-color);
-}
+/* Правая часть — звезда старосты + кнопка копирования */
 
-/* Правая часть (Звезда старосты) */
 .students__item__right {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.45rem;
   color: var(--primary-color);
-  transition: transform 0.15s ease;
 }
 
-.students__item:active .students__item__right {
-  transform: scale(1.15) rotate(10deg);
+.students__star {
+  width: 16px;
+  height: 16px;
 }
 
-/* Анимация появления карточек */
-@keyframes studentSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+/* Круглая подложка-кнопка копирования.
+   Всегда видимая, заметная — чтобы её было легко найти. */
+.students__copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.75rem;
+  background-color: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  color: var(--primary-color);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary-color) 22%, transparent);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .students__item:hover .students__copy-btn {
+    background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
-/* Каскадное появление */
-.students__item:nth-child(1)  { animation-delay: 0.03s; }
-.students__item:nth-child(2)  { animation-delay: 0.06s; }
-.students__item:nth-child(3)  { animation-delay: 0.09s; }
-.students__item:nth-child(4)  { animation-delay: 0.12s; }
-.students__item:nth-child(5)  { animation-delay: 0.15s; }
-.students__item:nth-child(6)  { animation-delay: 0.18s; }
-.students__item:nth-child(7)  { animation-delay: 0.21s; }
-.students__item:nth-child(8)  { animation-delay: 0.24s; }
-.students__item:nth-child(9)  { animation-delay: 0.27s; }
-.students__item:nth-child(10) { animation-delay: 0.30s; }
-.students__item:nth-child(11) { animation-delay: 0.33s; }
-.students__item:nth-child(12) { animation-delay: 0.36s; }
-.students__item:nth-child(13) { animation-delay: 0.39s; }
-.students__item:nth-child(n+14) { animation-delay: 0.42s; }
+.students__item:active .students__copy-btn {
+  transform: scale(0.94);
+}
+
+.students__copy-btn--copied {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--primary-color) 60%, transparent);
+}
+
+.students__copy-btn__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+/* Кнопка «Скопировать всех» — справа от поля поиска */
+
+.students__copy-all {
+  appearance: none;
+  border: 0;
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.65rem;
+  background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
+  color: var(--primary-color);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.students__copy-all:active {
+  transform: scale(0.92);
+  background-color: color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.students__copy-all--copied {
+  background-color: var(--primary-color);
+  color: #fff;
+}
+
+/* Пустые состояния */
 
 .students__empty {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: var(--light-font-color);
   opacity: 0.6;
   text-align: center;
+  margin: 0;
+}
+
+.students__hint {
+  font-size: 0.85rem;
+  color: var(--light-font-color);
+  opacity: 0.55;
+  text-align: center;
+  margin: 0;
+  max-width: 20rem;
 }
 
 @keyframes fadeIn {

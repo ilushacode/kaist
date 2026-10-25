@@ -1,20 +1,25 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { ChevronRight, Search, X } from 'lucide-react';
+import { ChevronRight, Users } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
-import { collectAllTeachers, collectTeachers, searchTeachers } from '../utils/teachers';
+import {
+  collectAllTeachers,
+  collectTeachers,
+  searchTeachers,
+} from '../utils/teachers';
 import { capitalizeName } from '../utils/string';
 import { useModal } from '../providers/ModalProvider';
 import TeacherModal from '../modals/TeacherModal';
 import Loader from './LoaderComponent';
+import { SearchToolbar } from './SearchToolbar';
 import '../styles/Teachers.css';
+import '../styles/SearchToolbar.css';
 
 const ERROR_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_error.png`;
 
 const SPRING = { type: 'spring', stiffness: 500, damping: 38, mass: 0.6 } as const;
-const SLIDE_SPRING = { type: 'spring', stiffness: 420, damping: 34, mass: 0.6 } as const;
 const CASCADE_STEP = 0.04;
-const MAX_HINTS = 8;
+const MAX_HINTS = 12;
 
 function getInitials(name: string): string {
   if (!name) return '?';
@@ -49,22 +54,14 @@ export const TeachersComponent = () => {
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    if (searchOpen) {
-      const raf = requestAnimationFrame(() => inputRef.current?.focus());
-      return () => cancelAnimationFrame(raf);
-    }
-    setQuery('');
-    return;
+    if (!searchOpen) setQuery('');
   }, [searchOpen]);
 
   const handleOpenTeacher = (teacher: string) => {
     openModal(TeacherModal, { teacher });
   };
-
-  const handleCloseSearch = () => setSearchOpen(false);
 
   const suggestions = useMemo(
     () => searchTeachers(allTeachers, query, MAX_HINTS),
@@ -105,6 +102,10 @@ export const TeachersComponent = () => {
       </div>
     );
   }
+
+  const toolbarLabel = teachers.length > 0
+    ? `В группе ${selectedGroup ?? '—'}`
+    : 'Все преподаватели';
 
   const renderGroupRow = (
     item: { teacher: string; departments: string[]; subjects: string[] },
@@ -149,67 +150,14 @@ export const TeachersComponent = () => {
 
   return (
     <div className="teachers">
-      <div className="teachers__toolbar">
-        <AnimatePresence initial={false} mode="sync">
-          {!searchOpen && (
-            <motion.div
-              key="title-row"
-              className="teachers__toolbar-layer"
-              initial={{ y: '100%', opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: '-100%', opacity: 0 }}
-              transition={SLIDE_SPRING}
-            >
-              <span className="teachers__toolbar-title">
-                {teachers.length > 0 ? 'Ведут у группы' : 'Преподаватели'}
-              </span>
-              <motion.button
-                type="button"
-                className="teachers__search-toggle"
-                onClick={() => setSearchOpen(true)}
-                aria-label="Найти преподавателя"
-                title="Найти преподавателя"
-                whileTap={{ scale: 0.9 }}
-              >
-                <Search size={16} strokeWidth={2.2} />
-              </motion.button>
-            </motion.div>
-          )}
-
-          {searchOpen && (
-            <motion.div
-              key="search-row"
-              className="teachers__toolbar-layer"
-              initial={{ y: '100%', opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: '100%', opacity: 0 }}
-              transition={SLIDE_SPRING}
-            >
-              <div className="teachers__search-input-wrap">
-                <Search size={16} strokeWidth={2} className="teachers__search-icon" />
-                <input
-                  ref={inputRef}
-                  type="text"
-                  className="teachers__search-input"
-                  placeholder="Имя преподавателя"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-                <button
-                  type="button"
-                  className="teachers__search-close"
-                  onClick={handleCloseSearch}
-                  aria-label="Закрыть поиск"
-                >
-                  <X size={16} strokeWidth={2.2} />
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+      <SearchToolbar
+        label={toolbarLabel}
+        placeholder="Имя преподавателя или группа"
+        query={query}
+        onQueryChange={setQuery}
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+      />
 
       <div className="teachers__list">
         <AnimatePresence initial={false} mode="popLayout">
@@ -253,7 +201,7 @@ export const TeachersComponent = () => {
                 <div className="teachers__search-empty-block">
                   <p className="teachers__search-empty">Ничего не найдено</p>
                   <p className="teachers__search-empty-hint">
-                    Попробуйте другое написание
+                    Попробуйте другое написание имени или номер группы
                   </p>
                 </div>
               ) : (
@@ -265,20 +213,40 @@ export const TeachersComponent = () => {
                       className="teachers__search-result"
                       onClick={() => handleOpenTeacher(item.teacher)}
                     >
-                      <div className="teachers__search-result__avatar" aria-hidden="true">
+                      <div
+                        className="teachers__search-result__avatar"
+                        aria-hidden="true"
+                      >
                         {getInitials(item.teacher)}
                       </div>
                       <div className="teachers__search-result__body">
                         <span className="teachers__search-result__name">
                           {capitalizeName(item.teacher)}
                         </span>
-                        {(item.departments.length > 0 || item.subjects.length > 0) && (
+                        {(item.groups.length > 0 ||
+                          item.departments.length > 0 ||
+                          item.subjects.length > 0) && (
                           <span className="teachers__search-result__meta">
-                            {item.departments.join(' · ') || item.subjects.join(' · ')}
+                            {item.groups.length > 0 && (
+                              <span className="teachers__search-result__groups">
+                                <Users size={11} strokeWidth={2.4} />
+                                {item.groups.join(', ')}
+                              </span>
+                            )}
+                            {(item.departments.length > 0 ||
+                              item.subjects.length > 0) && (
+                              <span className="teachers__search-result__extra">
+                                {item.departments.join(' · ') ||
+                                  item.subjects.join(' · ')}
+                              </span>
+                            )}
                           </span>
                         )}
                       </div>
-                      <span className="teachers__search-result__chevron" aria-hidden="true">
+                      <span
+                        className="teachers__search-result__chevron"
+                        aria-hidden="true"
+                      >
                         <ChevronRight size={16} strokeWidth={2.2} />
                       </span>
                     </button>

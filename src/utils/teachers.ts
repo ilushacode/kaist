@@ -4,20 +4,28 @@ interface Entry {
   teacher: string;
   departments: Set<string>;
   subjects: Set<string>;
+  groups: Set<string>;
 }
 
 const add = (
   map: Map<string, Entry>,
   teacher: string | undefined,
   department: string | undefined | null,
-  subject: string | undefined
+  subject: string | undefined,
+  group: string | undefined
 ): void => {
   const name = (teacher ?? '').trim();
   if (!name) return;
   const entry =
-    map.get(name) ?? { teacher: name, departments: new Set(), subjects: new Set() };
+    map.get(name) ?? {
+      teacher: name,
+      departments: new Set<string>(),
+      subjects: new Set<string>(),
+      groups: new Set<string>(),
+    };
   if (department) entry.departments.add(department);
   if (subject) entry.subjects.add(subject);
+  if (group) entry.groups.add(group);
   map.set(name, entry);
 };
 
@@ -30,6 +38,7 @@ const toEntries = (map: Map<string, Entry>): TeacherEntry[] =>
       teacher: entry.teacher,
       departments: toSortedList(entry.departments),
       subjects: toSortedList(entry.subjects),
+      groups: toSortedList(entry.groups),
     }))
     .sort((a, b) => a.teacher.localeCompare(b.teacher, 'ru'));
 
@@ -42,10 +51,10 @@ export const collectTeachers = (
   if (!group) return [];
 
   for (const lesson of scheduleGroups?.[group] ?? []) {
-    add(map, lesson.p, lesson.u, lesson.s);
+    add(map, lesson.p, lesson.u, lesson.s, group);
   }
   for (const exam of examsGroups?.[group] ?? []) {
-    add(map, exam.p, null, exam.s);
+    add(map, exam.p, null, exam.s, group);
   }
 
   return toEntries(map);
@@ -62,19 +71,19 @@ export const collectAllTeachers = (
   const map = new Map<string, Entry>();
 
   if (scheduleGroups) {
-    for (const lessons of Object.values(scheduleGroups)) {
+    for (const [group, lessons] of Object.entries(scheduleGroups)) {
       if (!Array.isArray(lessons)) continue;
       for (const lesson of lessons) {
-        add(map, lesson.p, lesson.u, lesson.s);
+        add(map, lesson.p, lesson.u, lesson.s, group);
       }
     }
   }
 
   if (examsGroups) {
-    for (const exams of Object.values(examsGroups)) {
+    for (const [group, exams] of Object.entries(examsGroups)) {
       if (!Array.isArray(exams)) continue;
       for (const exam of exams) {
-        add(map, exam.p, null, exam.s);
+        add(map, exam.p, null, exam.s, group);
       }
     }
   }
@@ -90,12 +99,18 @@ const normalizeForSearch = (value: string): string =>
     .trim();
 
 /**
- * Поиск преподавателя по имени.
+ * Поиск преподавателя.
+ *
+ * Запрос может быть:
+ *   - именем (или его частью) — ищем по подстроке в ФИО;
+ *   - номером группы (или его началом) — ищем преподавателей,
+ *     которые ведут в этой группе.
  *
  * Ранжирование (чем меньше score, тем выше в списке):
- *   0 — запрос совпадает с началом фамилии,
- *   1 — запрос совпадает с началом любого слова в имени,
- *   2 — запрос — подстрока имени.
+ *   0 — совпадение с началом фамилии;
+ *   1 — совпадение с началом любого слова;
+ *   2 — подстрока в ФИО;
+ *   3 — совпадение по группе (только если запрос похож на номер группы).
  *
  * Сортировка внутри группы — по алфавиту (localeCompare 'ru').
  */
@@ -107,24 +122,36 @@ export const searchTeachers = (
   const raw = String(query ?? '').trim();
   if (raw.length < 1) return [];
   const needle = normalizeForSearch(raw);
+  const groupNeedle = raw.replace(/\D/g, '');
 
   const scored: Array<{ entry: TeacherEntry; score: number }> = [];
 
   for (const entry of entries) {
     const haystack = normalizeForSearch(entry.teacher);
     const idx = haystack.indexOf(needle);
-    if (idx === -1) continue;
 
-    let score: number;
-    if (idx === 0) {
-      score = 0;
-    } else if (haystack[idx - 1] === ' ') {
-      score = 1;
-    } else {
-      score = 2;
+    let bestScore = Number.POSITIVE_INFINITY;
+
+    if (idx !== -1) {
+      if (idx === 0) bestScore = 0;
+      else if (haystack[idx - 1] === ' ') bestScore = 1;
+      else bestScore = 2;
     }
 
-    scored.push({ entry, score });
+    // Совпадение по номеру группы — только если в запросе есть цифры
+    // и он не длиннее 4 символов (номера групп в вузе 4-значные).
+    if (groupNeedle.length > 0 && groupNeedle.length <= 4) {
+      for (const g of entry.groups) {
+        if (g.startsWith(groupNeedle)) {
+          if (bestScore > 3) bestScore = 3;
+          break;
+        }
+      }
+    }
+
+    if (bestScore !== Number.POSITIVE_INFINITY) {
+      scored.push({ entry, score: bestScore });
+    }
   }
 
   scored.sort((a, b) => {

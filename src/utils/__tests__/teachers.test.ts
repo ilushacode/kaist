@@ -31,11 +31,12 @@ describe('collectTeachers', () => {
     expect(names).toEqual(['ИВАНОВ И.И.', 'ПЕТРОВ П.П.']);
   });
 
-  it('собирает кафедры и предметы', () => {
+  it('собирает кафедры, предметы и группы', () => {
     const result = collectTeachers('3439', scheduleGroups, examsGroups);
     const ivanov = result.find((t) => t.teacher === 'ИВАНОВ И.И.');
     expect(ivanov?.departments).toContain('Кафедра ПМИ');
     expect(ivanov?.subjects).toContain('Матан');
+    expect(ivanov?.groups).toEqual(['3439']);
   });
 
   it('сортирует по имени', () => {
@@ -64,6 +65,16 @@ describe('collectAllTeachers', () => {
     expect(ivanov).toHaveLength(1);
   });
 
+  it('собирает группы, в которых ведёт преподаватель', () => {
+    const groupsWithSameTeacher: Record<string, GroupScheduleLesson[]> = {
+      '3439': [{ d: '1', t: '09:00', s: 'Матан', p: 'ИВАНОВ И.И.' }],
+      '3440': [{ d: '1', t: '09:00', s: 'Тервер', p: 'ИВАНОВ И.И.' }],
+    };
+    const result = collectAllTeachers(groupsWithSameTeacher, null);
+    const ivanov = result.find((t) => t.teacher === 'ИВАНОВ И.И.');
+    expect(ivanov?.groups).toEqual(['3439', '3440']);
+  });
+
   it('возвращает [] для пустых данных', () => {
     expect(collectAllTeachers(null, null)).toEqual([]);
     expect(collectAllTeachers({}, {})).toEqual([]);
@@ -80,11 +91,11 @@ describe('collectAllTeachers', () => {
 
 describe('searchTeachers', () => {
   const entries: TeacherEntry[] = [
-    { teacher: 'ИВАНОВ И.И.', departments: [], subjects: [] },
-    { teacher: 'ИВАНОВА М.А.', departments: [], subjects: [] },
-    { teacher: 'ПЕТРОВ П.П.', departments: [], subjects: [] },
-    { teacher: 'СИДОРОВ С.С.', departments: [], subjects: [] },
-    { teacher: 'ЁЖИКОВ А.А.', departments: [], subjects: [] },
+    { teacher: 'ИВАНОВ И.И.', departments: [], subjects: [], groups: ['3439'] },
+    { teacher: 'ИВАНОВА М.А.', departments: [], subjects: [], groups: ['3410'] },
+    { teacher: 'ПЕТРОВ П.П.', departments: [], subjects: [], groups: ['3439'] },
+    { teacher: 'СИДОРОВ С.С.', departments: [], subjects: [], groups: ['4191'] },
+    { teacher: 'ЁЖИКОВ А.А.', departments: [], subjects: [], groups: ['3100'] },
   ];
 
   it('пустой запрос — пустой результат', () => {
@@ -113,6 +124,27 @@ describe('searchTeachers', () => {
   it('нормализует ё → е', () => {
     expect(searchTeachers(entries, 'ежиков')).toHaveLength(1);
     expect(searchTeachers(entries, 'ёжиков')).toHaveLength(1);
+  });
+
+  it('находит преподавателей по номеру группы', () => {
+    const result = searchTeachers(entries, '3439');
+    const names = result.map((t) => t.teacher);
+    expect(names).toContain('ИВАНОВ И.И.');
+    expect(names).toContain('ПЕТРОВ П.П.');
+    expect(names).not.toContain('СИДОРОВ С.С.');
+  });
+
+  it('находит преподавателей по началу номера группы', () => {
+    const result = searchTeachers(entries, '34');
+    const names = result.map((t) => t.teacher);
+    expect(names).toContain('ИВАНОВ И.И.');
+    expect(names).toContain('ПЕТРОВ П.П.');
+    expect(names).toContain('ИВАНОВА М.А.');
+  });
+
+  it('имя имеет приоритет над группой', () => {
+    const result = searchTeachers(entries, 'сидоров');
+    expect(result[0].teacher).toBe('СИДОРОВ С.С.');
   });
 
   it('уважает limit', () => {
