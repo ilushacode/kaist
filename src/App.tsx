@@ -15,6 +15,7 @@ import { ExamsPage } from './pages/ExamsPage';
 import { InstallBanner } from './components/InstallBannerComponent';
 import { compareDay, getMondayOfWeek, shiftDate } from './utils/date';
 import { useTheme } from './hooks/useTheme';
+import { useStats } from './hooks/useStats';
 
 function getSemesterRange(today: Date): { start: Date; end: Date } {
   const year = today.getFullYear();
@@ -30,6 +31,7 @@ function getSemesterRange(today: Date): { start: Date; end: Date } {
 
 function App() {
   useTheme();
+  useStats();
 
   const today = useMemo(() => {
     const d = new Date();

@@ -6,6 +6,10 @@ import { useStore } from '../hooks/useStore';
  * Чистит Zustand-стор (включая IndexedDB-кэши через resetAll) и все
  * localStorage-ключи, которые использует приложение, включая ключи
  * install-баннера. После успешного сброса перезагружает страницу.
+ *
+ * ВАЖНО: ключ `kaist-device-id` (уникальный ID устройства для статистики)
+ * НЕ очищается. Он должен переживать сброс приложения, чтобы статистика
+ * продолжала считать устройство тем же самым.
  */
 export async function resetApp({ reload = true }: { reload?: boolean } = {}): Promise<void> {
   try {
@@ -21,6 +25,9 @@ export async function resetApp({ reload = true }: { reload?: boolean } = {}): Pr
     localStorage.removeItem('install-banner-dismissed-until');
     localStorage.removeItem('install-banner-installed');
     localStorage.removeItem('kaist-app-v5');
+
+    // Намеренно НЕ трогаем 'kaist-device-id'.
+    // Это стабильный идентификатор устройства для статистики.
   } catch {
     /* noop */
   }
