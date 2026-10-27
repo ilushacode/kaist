@@ -10,17 +10,25 @@ import '../styles/DebugModal.css';
 interface MetricRow {
   label: string;
   value: string;
+  rawValue?: string | null; // для копирования полного значения
 }
 
 const fmt = (n: number): string => n.toLocaleString('ru-RU');
+
+/** Обрезает длинную строку (хэш), оставляя начало и конец. */
+const shortenHash = (hash: string | null | undefined): string => {
+  if (!hash) return '—';
+  if (hash.length <= 16) return hash;
+  return `${hash.slice(0, 6)}...${hash.slice(-6)}`;
+};
 
 export default function DebugModal() {
   const { closeModal } = useModal();
   const { copy } = useCopyToClipboard();
 
-  // Получаем ID устройства (он создаётся/читается из localStorage)
   const deviceId = useMemo(() => getOrCreateDeviceId(), []);
   const [copiedId, setCopiedId] = useState(false);
+  const [copiedHash, setCopiedHash] = useState<string | null>(null);
 
   const scheduleGroups = useStore((s) => s.scheduleGroups);
   const examsGroups = useStore((s) => s.examsGroups);
@@ -45,12 +53,21 @@ export default function DebugModal() {
     }
   };
 
+  const handleCopyHash = async (raw: string | null | undefined, label: string) => {
+    if (!raw) return;
+    const ok = await copy(raw);
+    if (ok) {
+      setCopiedHash(label);
+      setTimeout(() => setCopiedHash(null), 2000);
+    }
+  };
+
   const hashes: MetricRow[] = useMemo(
     () => [
-      { label: 'schedule', value: scheduleHash ?? '—' },
-      { label: 'exams', value: examsHash ?? '—' },
-      { label: 'students', value: studentsHash ?? '—' },
-      { label: 'ads', value: adsHash ?? '—' },
+      { label: 'Расписание', value: shortenHash(scheduleHash), rawValue: scheduleHash },
+      { label: 'Экзамены', value: shortenHash(examsHash), rawValue: examsHash },
+      { label: 'Студенты', value: shortenHash(studentsHash), rawValue: studentsHash },
+      { label: 'Реклама', value: shortenHash(adsHash), rawValue: adsHash },
     ],
     [scheduleHash, examsHash, studentsHash, adsHash]
   );
@@ -89,10 +106,10 @@ export default function DebugModal() {
 
   const updatedAt: MetricRow[] = useMemo(
     () => [
-      { label: 'schedule', value: scheduleUpdatedAt ?? '—' },
-      { label: 'exams', value: examsUpdatedAt ?? '—' },
-      { label: 'students', value: studentsUpdatedAt ?? '—' },
-      { label: 'ads', value: adsUpdatedAt ?? '—' },
+      { label: 'Расписание', value: scheduleUpdatedAt ?? '—' },
+      { label: 'Экзамены', value: examsUpdatedAt ?? '—' },
+      { label: 'Студенты', value: studentsUpdatedAt ?? '—' },
+      { label: 'Реклама', value: adsUpdatedAt ?? '—' },
     ],
     [scheduleUpdatedAt, examsUpdatedAt, studentsUpdatedAt, adsUpdatedAt]
   );
@@ -152,10 +169,17 @@ export default function DebugModal() {
           </h3>
           <div className="debug_modal__rows">
             {hashes.map((row) => (
-              <div className="debug_modal__row" key={`hash-${row.label}`}>
+              <div
+                className="debug_modal__row debug_modal__row--clickable"
+                key={`hash-${row.label}`}
+                onClick={() => void handleCopyHash(row.rawValue, row.label)}
+                role="button"
+                tabIndex={0}
+                title="Нажмите, чтобы скопировать полный хэш"
+              >
                 <span className="debug_modal__row__label">{row.label}</span>
                 <span className="debug_modal__row__value debug_modal__row__value--mono">
-                  {row.value}
+                  {copiedHash === row.label ? 'Скопировано' : row.value}
                 </span>
               </div>
             ))}

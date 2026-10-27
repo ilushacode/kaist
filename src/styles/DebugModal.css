@@ -294,3 +294,33 @@
   transform: scale(0.97);
   opacity: 0.9;
 }
+
+/* ─── Кликабельные строки (хэши) ─── */
+
+.debug_modal__row--clickable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.15s ease;
+  user-select: none;
+}
+
+.debug_modal__row--clickable:active {
+  background-color: color-mix(in srgb, var(--primary-color) 10%, transparent);
+}
+
+.debug_modal__row--clickable .debug_modal__row__value--mono {
+  color: var(--primary-color);
+  transition: opacity 0.15s ease;
+}
+
+.debug_modal__row--clickable:active .debug_modal__row__value--mono {
+  opacity: 0.7;
+}
+
+/* Защита от переполнения для значений */
+.debug_modal__row__value {
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
