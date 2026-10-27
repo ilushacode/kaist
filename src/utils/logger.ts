@@ -129,7 +129,7 @@ function stringifyArgs(args: unknown[]): string {
       if (typeof arg === 'object' && arg !== null) {
         try {
           const seen = new WeakSet();
-          return JSON.stringify(arg, (key, value) => {
+          return JSON.stringify(arg, (value) => {
             if (typeof value === 'object' && value !== null) {
               if (seen.has(value)) return '[Circular]';
               seen.add(value);
