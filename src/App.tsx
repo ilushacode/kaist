@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import './App.css';
 import { LoaderScreen } from './screens/LoaderScreen';
+import { UnsupportedBrowserScreen } from './screens/UnsupportedBrowserScreen';
 import { SetGroupComponent } from './components/SetGroupComponent';
 import { HelloComponent } from './components/HelloComponent';
 import useBootstrap from './hooks/useBootstrap';
@@ -16,6 +17,10 @@ import { InstallBanner } from './components/InstallBannerComponent';
 import { compareDay, getMondayOfWeek, shiftDate } from './utils/date';
 import { useTheme } from './hooks/useTheme';
 import { useStats } from './hooks/useStats';
+import {
+  checkBrowserSupport,
+  type SupportIssue,
+} from './utils/browserSupport';
 
 function getSemesterRange(today: Date): { start: Date; end: Date } {
   const year = today.getFullYear();
@@ -43,6 +48,30 @@ function App() {
   const [selectedDate, setSelectedDate] = useState<Date>(today);
   const [minTimePassed, setMinTimePassed] = useState(false);
   const [helloPassed, setHelloPassed] = useState(false);
+
+  // ── Проверка совместимости браузера ──
+  const [supportIssues, setSupportIssues] = useState<SupportIssue[] | null>(null);
+  const [supportChecked, setSupportChecked] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    checkBrowserSupport()
+      .then((report) => {
+        if (cancelled) return;
+        setSupportIssues(report.ok ? [] : report.issues);
+        setSupportChecked(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setSupportIssues([]);
+        setSupportChecked(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const hasHydrated = useStore((s) => s._hasHydrated);
   const groups = useStore((s) => s.groups);
@@ -82,8 +111,16 @@ function App() {
     setSelectedDate(shiftDate(currentMonday, 7));
   };
 
-  if (!hasHydrated || !ready || !minTimePassed) {
+  if (!minTimePassed || !supportChecked || !hasHydrated || !ready) {
     return <LoaderScreen />;
+  }
+
+  if (supportIssues && supportIssues.length > 0) {
+    return (
+      <div className="container theme_light">
+        <UnsupportedBrowserScreen issues={supportIssues} />
+      </div>
+    );
   }
 
   if (groups.length === 0 && !helloPassed) {
