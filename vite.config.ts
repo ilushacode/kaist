@@ -5,6 +5,11 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   base: './',
 
+  // Автоматически генерируем уникальную версию (timestamp) при каждой сборке
+  define: {
+    __BUILD_TIME__: JSON.stringify(Date.now().toString()),
+  },
+
   plugins: [
     react(),
     VitePWA({
@@ -44,8 +49,9 @@ export default defineConfig({
         ],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         cleanupOutdatedCaches: true,
-        skipWaiting: true, // Важно: разрешаем новому SW брать управление
+        skipWaiting: true, // Позволяем новому SW брать управление
         clientsClaim: true,
+        navigateFallback: 'index.html',
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.destination === 'image',

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
-import './App.css';
+import './App.css'; 
 import { LoaderScreen } from './screens/LoaderScreen';
 import { UnsupportedBrowserScreen } from './screens/UnsupportedBrowserScreen';
 import { SetGroupComponent } from './components/SetGroupComponent';
