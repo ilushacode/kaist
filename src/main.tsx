@@ -7,6 +7,10 @@ import { HashRouter } from 'react-router-dom';
 import { PhoneFrame } from './components/PhoneFrameComponent';
 import { registerSW } from 'virtual:pwa-register';
 import { UpdateBanner } from './components/UpdateBanner';
+import { initLogger } from './utils/logger';
+
+// Инициализируем логгер до рендера — чтобы поймать ошибки инициализации.
+initLogger();
 
 let updateSW: (reloadPage?: boolean) => Promise<void>;
 
