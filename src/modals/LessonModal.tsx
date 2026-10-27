@@ -1,7 +1,10 @@
+import { useMemo } from 'react';
 import { GraduationCap, ChevronRight } from 'lucide-react';
 import { addMinutes, isPastDay, isTodayDay, stripLeadingZero } from '../utils/date';
 import { capitalizeName, formatBuilding } from '../utils/string';
 import { getLessonTypeLabel } from '../utils/lesson';
+import { getLessonGroups } from '../utils/schedule';
+import { useStore } from '../hooks/useStore';
 import { TeacherLink } from '../components/TeacherLink';
 import type { Lesson } from '../types';
 import '../styles/LessonModal.css';
@@ -14,6 +17,14 @@ interface LessonModalProps {
 
 export default function LessonModal({ lesson }: LessonModalProps) {
   const dates = Array.isArray(lesson.dates) ? lesson.dates : [];
+  const scheduleGroups = useStore((s) => s.scheduleGroups);
+  const selectedGroup = useStore((s) => s.selectedGroup);
+
+  const flowGroups = useMemo(() => {
+    return getLessonGroups(scheduleGroups, lesson);
+  }, [scheduleGroups, lesson]);
+
+  const showGroups = flowGroups.length > 1;
 
   return (
     <div className="lesson_modal">
@@ -29,6 +40,23 @@ export default function LessonModal({ lesson }: LessonModalProps) {
             {formatBuilding(lesson.building)} · {lesson.room}
           </span>
         </div>
+
+        {/* ─── ДЕЛИКАТНЫЙ БЛОК С ГРУППАМИ ─── */}
+        {showGroups && (
+          <div className="lesson_modal__groups">
+            {flowGroups.map((group) => (
+              <span
+                key={group}
+                className={
+                  'lesson_modal__group-chip' +
+                  (group === selectedGroup ? ' lesson_modal__group-chip--active' : '')
+                }
+              >
+                {group}
+              </span>
+            ))}
+          </div>
+        )}
       </header>
 
       {dates.length > 0 && (

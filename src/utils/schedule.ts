@@ -66,3 +66,58 @@ export const getLessonsForDate = (
     .map(mapLesson)
     .sort((a, b) => a.time.localeCompare(b.time));
 };
+
+/**
+ * Находит все группы, у которых есть такая же пара (поток).
+ * Если у пары есть конкретные даты (ds), сравниваем их массивы.
+ * Если дат нет, сравниваем по дню недели (d).
+ */
+export const getLessonGroups = (
+  scheduleGroups: Record<string, GroupScheduleLesson[]> | null | undefined,
+  targetLesson: Lesson
+): string[] => {
+  if (!scheduleGroups) return [];
+
+  const groups: string[] = [];
+  
+  // Нормализуем даты целевой пары для сравнения (сортируем и склеиваем)
+  const targetDatesStr = targetLesson.dates
+    .filter((v) => /\d/.test(v)) // оставляем только даты, отбрасываем "чет"/"нечет"
+    .sort()
+    .join(',');
+
+  for (const [group, lessons] of Object.entries(scheduleGroups)) {
+    const hasMatch = lessons.some((l) => {
+      const mapped = mapLesson(l);
+      
+      // Базовое совпадение: время, предмет, аудитория, корпус, преподаватель
+      const baseMatch =
+        mapped.time === targetLesson.time &&
+        mapped.subject === targetLesson.subject &&
+        mapped.room === targetLesson.room &&
+        mapped.building === targetLesson.building &&
+        mapped.teacher === targetLesson.teacher;
+
+      if (!baseMatch) return false;
+
+      // Нормализуем даты текущей пары
+      const currentDatesStr = mapped.dates
+        .filter((v) => /\d/.test(v))
+        .sort()
+        .join(',');
+
+      // Если есть конкретные даты, они должны совпадать
+      if (targetDatesStr || currentDatesStr) {
+        if (targetDatesStr !== currentDatesStr) return false;
+      }
+
+      return true;
+    });
+
+    if (hasMatch) {
+      groups.push(group);
+    }
+  }
+
+  return groups.sort((a, b) => a.localeCompare(b, 'ru'));
+};
