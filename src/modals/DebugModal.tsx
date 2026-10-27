@@ -1,7 +1,9 @@
-import { useMemo } from 'react';
-import { Database, Hash, RotateCcw } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Database, Hash, RotateCcw, Copy, Check, Fingerprint } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import { useModal } from '../providers/ModalProvider';
+import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
+import { getOrCreateDeviceId } from '../utils/deviceId';
 import { resetApp } from '../utils/resetApp';
 import '../styles/DebugModal.css';
 
@@ -14,6 +16,11 @@ const fmt = (n: number): string => n.toLocaleString('ru-RU');
 
 export default function DebugModal() {
   const { closeModal } = useModal();
+  const { copy } = useCopyToClipboard();
+
+  // Получаем ID устройства (он создаётся/читается из localStorage)
+  const deviceId = useMemo(() => getOrCreateDeviceId(), []);
+  const [copiedId, setCopiedId] = useState(false);
 
   const scheduleGroups = useStore((s) => s.scheduleGroups);
   const examsGroups = useStore((s) => s.examsGroups);
@@ -29,6 +36,14 @@ export default function DebugModal() {
   const examsUpdatedAt = useStore((s) => s.examsUpdatedAt);
   const studentsUpdatedAt = useStore((s) => s.studentsUpdatedAt);
   const adsUpdatedAt = useStore((s) => s.adsUpdatedAt);
+
+  const handleCopyId = async () => {
+    const ok = await copy(deviceId);
+    if (ok) {
+      setCopiedId(true);
+      setTimeout(() => setCopiedId(false), 2000);
+    }
+  };
 
   const hashes: MetricRow[] = useMemo(
     () => [
@@ -98,6 +113,38 @@ export default function DebugModal() {
       </header>
 
       <div className="debug_modal__scroll">
+        {/* ─── ID УСТРОЙСТВА (АКЦЕНТНЫЙ БЛОК) ─── */}
+        <section className="debug_modal__device-card">
+          <h3 className="debug_modal__device-card__title">
+            <Fingerprint size={16} strokeWidth={2.2} />
+            ID устройства
+          </h3>
+          <button
+            type="button"
+            className="debug_modal__device-card__btn"
+            onClick={() => void handleCopyId()}
+            aria-label="Скопировать ID устройства"
+          >
+            <span className="debug_modal__device-card__value">{deviceId}</span>
+            <span
+              className={
+                'debug_modal__device-card__icon' +
+                (copiedId ? ' debug_modal__device-card__icon--copied' : '')
+              }
+            >
+              {copiedId ? (
+                <Check size={16} strokeWidth={2.5} />
+              ) : (
+                <Copy size={15} strokeWidth={2.2} />
+              )}
+            </span>
+          </button>
+          <p className="debug_modal__device-card__hint">
+            Нажмите, чтобы скопировать. Отправьте этот ID в поддержку для
+            диагностики.
+          </p>
+        </section>
+
         <section className="debug_modal__section">
           <h3 className="debug_modal__section__title">
             <Hash size={14} strokeWidth={2.2} />
