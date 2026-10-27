@@ -15,7 +15,7 @@ import { SearchToolbar } from './SearchToolbar';
 import '../styles/Teachers.css';
 import '../styles/SearchToolbar.css';
 
-const ERROR_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_error.png`;
+const ERROR_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_error.webp`;
 
 const SPRING = { type: 'spring', stiffness: 500, damping: 38, mass: 0.6 } as const;
 const CASCADE_STEP = 0.04;

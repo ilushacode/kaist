@@ -15,7 +15,7 @@ import type { StudentEntry } from '../types';
 import '../styles/Students.css';
 import '../styles/SearchToolbar.css';
 
-const ERROR_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_error.png`;
+const ERROR_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_error.webp`;
 const MAX_SEARCH_RESULTS = 100;
 
 /** Пружинка для смены иконки Copy ⇄ Check. */

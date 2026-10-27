@@ -1,7 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react';
 
-const SLEEP_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_sleep.png`;
-const AWAKE_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_awake.png`;
+const SLEEP_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_sleep.webp`;
+const AWAKE_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_awake.webp`;
 
 const AWAKE_DURATION_MS = 2000;
 const COOLDOWN_MS = 3000;

@@ -7,8 +7,8 @@ import { ExamCard } from './exams/ExamCard';
 import { ExamEmpty } from './exams/ExamEmpty';
 import '../styles/Exams.css';
 
-const EMPTY_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_sleep.png`;
-const ERROR_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_error.png`;
+const EMPTY_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_sleep.webp`;
+const ERROR_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_error.webp`;
 
 export const ExamsComponent = () => {
   const selectedGroup = useStore((s) => s.selectedGroup);
