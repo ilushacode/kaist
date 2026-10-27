@@ -64,31 +64,35 @@ function detectEnvironment(): {
 } {
   if (cachedEnv) return cachedEnv;
 
-  const parser = new UAParser();
-  const result = parser.getResult();
+  try {
+    const parser = new UAParser();
+    const result = parser.getResult();
 
-  const deviceType = result.device.type ?? 'desktop';
-  const vendor = result.device.vendor ?? '';
-  const model = result.device.model ?? '';
-  const device = [deviceType, vendor, model].filter(Boolean).join(':');
+    const deviceType = result.device.type ?? 'desktop';
+    const vendor = result.device.vendor ?? '';
+    const model = result.device.model ?? '';
+    const device = [deviceType, vendor, model].filter(Boolean).join(':');
 
-  const browser = [result.browser.name, result.browser.major]
-    .filter(Boolean)
-    .join(':');
+    const browser = [result.browser.name, result.browser.major]
+      .filter(Boolean)
+      .join(':');
 
-  const os = [result.os.name, result.os.version].filter(Boolean).join(':');
+    const os = [result.os.name, result.os.version].filter(Boolean).join(':');
 
-  const isPwa =
-    (typeof window !== 'undefined' &&
-      window.matchMedia?.('(display-mode: standalone)').matches) ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true;
+    const isPwa =
+      (typeof window !== 'undefined' &&
+        window.matchMedia?.('(display-mode: standalone)').matches) ||
+      (navigator as Navigator & { standalone?: boolean }).standalone === true;
 
-  cachedEnv = {
-    device: device || 'unknown',
-    browser: browser || 'unknown',
-    os: os || 'unknown',
-    pwa: Boolean(isPwa),
-  };
+    cachedEnv = {
+      device: device || 'unknown',
+      browser: browser || 'unknown',
+      os: os || 'unknown',
+      pwa: Boolean(isPwa),
+    };
+  } catch {
+    cachedEnv = { device: 'unknown', browser: 'unknown', os: 'unknown', pwa: false };
+  }
 
   return cachedEnv;
 }
@@ -96,7 +100,6 @@ function detectEnvironment(): {
 // ─── Утилиты ─────────────────────────────────────────────────
 
 function generateId(): string {
-  // Компактный ID: base36 от времени + случайность.
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
@@ -112,7 +115,10 @@ function truncateMsg(msg: string): string {
   return msg.slice(0, MAX_MSG_LENGTH) + '…';
 }
 
-/** Безопасно сериализует аргументы console в строку. */
+/** 
+ * Безопасно сериализует аргументы console в строку.
+ * Защищает от циклических ссылок и несериализуемых объектов.
+ */
 function stringifyArgs(args: unknown[]): string {
   return args
     .map((arg) => {
@@ -122,7 +128,14 @@ function stringifyArgs(args: unknown[]): string {
       if (typeof arg === 'string') return arg;
       if (typeof arg === 'object' && arg !== null) {
         try {
-          return JSON.stringify(arg);
+          const seen = new WeakSet();
+          return JSON.stringify(arg, (key, value) => {
+            if (typeof value === 'object' && value !== null) {
+              if (seen.has(value)) return '[Circular]';
+              seen.add(value);
+            }
+            return value;
+          });
         } catch {
           return '[object]';
         }
@@ -174,20 +187,16 @@ function shouldSend(entry: LogEntry): boolean {
   const cached = dedupeCache.get(key);
 
   if (cached && now - cached.lastSent < DEDUPE_WINDOW_MS) {
-    // Не отправляем, но увеличиваем счётчик — при следующей отправке
-    // (после окна) он покажет, сколько раз ошибка повторилась.
     cached.count += 1;
     return false;
   }
 
-  // Если это повтор после окна — обновляем cnt и отправляем.
   if (cached) {
     entry.cnt = cached.count + 1;
   }
 
   dedupeCache.set(key, { lastSent: now, count: 0 });
 
-  // Чистим старые ключи, чтобы Map не рос бесконечно.
   if (dedupeCache.size > 200) {
     const cutoff = now - DEDUPE_WINDOW_MS * 2;
     for (const [k, v] of dedupeCache) {
@@ -215,10 +224,17 @@ async function compressGzip(data: string): Promise<Blob | null> {
 async function sendBatch(entries: LogEntry[], useKeepalive = false): Promise<void> {
   if (entries.length === 0) return;
 
-  const json = JSON.stringify(entries);
-  const gzipBlob = await compressGzip(json);
+  let json: string;
+  try {
+    // Защита от любых неожиданных циклических ссылок на верхнем уровне
+    json = JSON.stringify(entries);
+  } catch {
+    return; // Если не смогли сериализовать — молча пропускаем, чтобы не спамить
+  }
 
+  const gzipBlob = await compressGzip(json);
   const body = gzipBlob ?? new Blob([json], { type: 'application/json' });
+  
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'X-Device-Id': getOrCreateDeviceId(),
@@ -237,8 +253,7 @@ async function sendBatch(entries: LogEntry[], useKeepalive = false): Promise<voi
       cache: 'no-store',
     });
   } catch {
-    // Не логируем ошибку отправки в консоль — иначе бесконечный цикл.
-    // Просто теряем батч; следующая ошибка попробует снова.
+    // Не логируем ошибку отправки, чтобы не уйти в бесконечный цикл
   }
 }
 
@@ -313,8 +328,6 @@ function interceptGlobalErrors(): void {
 }
 
 function interceptPageHide(): void {
-  // pagehide — последний надёжный момент для отправки.
-  // visibilitychange тоже ловим, но только при hidden.
   const handler = () => {
     if (document.visibilityState === 'hidden') {
       void flush(true);
@@ -327,34 +340,20 @@ function interceptPageHide(): void {
 
 // ─── Публичный API ───────────────────────────────────────────
 
-/**
- * Инициализирует логгер. Вызывать один раз при старте приложения
- * (до рендера React, чтобы перехватить ошибки инициализации).
- */
 export function initLogger(): void {
   if (initialized) return;
   initialized = true;
 
-  // Предзагружаем окружение, чтобы первая ошибка не тормозила.
   detectEnvironment();
-
   interceptConsole();
   interceptGlobalErrors();
   interceptPageHide();
 }
 
-/**
- * Принудительно отправляет накопленные логи.
- * Используется в тестах и при отладке.
- */
 export function flushLogs(): Promise<void> {
   return flush(false);
 }
 
-/**
- * Восстанавливает оригинальные методы console.
- * Только для тестов — в проде не вызывается.
- */
 export function resetLoggerForTests(): void {
   if (!initialized) return;
   console.error = originalConsole.error;
