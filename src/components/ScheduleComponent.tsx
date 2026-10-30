@@ -11,7 +11,7 @@ import { formatDM, getLessonGaps, shiftDate } from '../utils/date';
 import { EMPTY_SUBTITLES } from '../content/emptySubtitles';
 import { slideVariants, slideTransition } from '../animations/variants';
 import Loader from './LoaderComponent';
-import type { Direction } from '../types';
+import type { Direction, Lesson } from '../types';
 import '../styles/Schedule.css';
 
 const EMPTY_IMAGE_SRC = `${import.meta.env.BASE_URL}images/goose_sleep.png`;
@@ -38,8 +38,24 @@ export const ScheduleComponent = ({ selectedDate, onDateChange }: ScheduleCompon
     [scheduleGroups, selectedGroup, renderedDate]
   );
 
-  // Промежутки между парами: перемена / окно.
-  const gaps = useMemo(() => getLessonGaps(lessons), [lessons]);
+  // Группируем пары по времени начала
+  const groupedLessons = useMemo(() => {
+    const groups: Lesson[][] = [];
+    for (const lesson of lessons) {
+      if (groups.length > 0 && groups[groups.length - 1][0].time === lesson.time) {
+        groups[groups.length - 1].push(lesson);
+      } else {
+        groups.push([lesson]);
+      }
+    }
+    return groups;
+  }, [lessons]);
+
+  // Считаем промежутки, беря по одной паре из каждой группы
+  const gaps = useMemo(() => {
+    const representativeLessons = groupedLessons.map((g) => g[0]);
+    return getLessonGaps(representativeLessons);
+  }, [groupedLessons]);
 
   const gapByAfterIndex = useMemo(() => {
     const map = new Map<number, (typeof gaps)[number]>();
@@ -122,7 +138,7 @@ export const ScheduleComponent = ({ selectedDate, onDateChange }: ScheduleCompon
       return (
         <ScheduleEmpty
           title="Не удалось загрузить расписание"
-          subtitle="Проверьте соединение и попробуйте позже"
+          subtitle="Проверьте соединение или попробуйте позже"
           onRetry={retryBootstrap}
         />
       );
@@ -139,13 +155,13 @@ export const ScheduleComponent = ({ selectedDate, onDateChange }: ScheduleCompon
 
     return (
       <div className="schedule">
-        {lessons.map((lesson, i) => {
+        {groupedLessons.map((group, i) => {
           const gap = gapByAfterIndex.get(i);
           return (
             <ScheduleLesson
-              key={`${lesson.subject}-${lesson.time}-${i}`}
+              key={`group-${i}`}
+              lessons={group}
               date={renderedDate}
-              lesson={lesson}
               gap={gap}
             />
           );
@@ -159,6 +175,7 @@ export const ScheduleComponent = ({ selectedDate, onDateChange }: ScheduleCompon
     renderedDate,
     emptySubtitleIndex,
     retryBootstrap,
+    groupedLessons,
     gapByAfterIndex,
   ]);
 

@@ -54,6 +54,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Убираем отступ снизу у последней пары */
+.schedule_lesson:not(:has(.schedule_lesson__break)) {
+  margin-bottom: 1rem;
+}
+
 /* --- ВРЕМЯ --- */
 
 .schedule_lesson__times {
@@ -123,6 +128,17 @@
   flex-direction: column;
 }
 
+/* Сетка для карточек (1 или 2 колонки) */
+.schedule_lesson__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+.schedule_lesson__grid--group {
+  grid-template-columns: 1fr 1fr;
+}
+
 .schedule_lesson__content {
   position: relative;
   cursor: pointer;
@@ -133,7 +149,10 @@
   transition: background-color 0.2s ease, transform 0.15s ease;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  /* margin-bottom убран, отступы теперь задаются у break */
+}
+
+.schedule_lesson__grid--group .schedule_lesson__content {
+  padding: 0.75rem 0.85rem 0.85rem; /* Чуть компактнее для двух колонок */
 }
 
 .schedule_lesson__content:active {
@@ -162,6 +181,10 @@
   margin: 0;
   overflow-wrap: break-word;
   word-break: break-word;
+}
+
+.schedule_lesson__grid--group .schedule_lesson__content__title {
+  font-size: 0.9rem;
 }
 
 .schedule_lesson__content__meta {
@@ -198,7 +221,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Симметричные отступы сверху и снизу */
   padding: 0.85rem 0;
 }
 
