@@ -108,3 +108,68 @@ export const isTodayDay = (value: string): boolean => {
 };
 
 export const todayStamp = (): string => formatISO(new Date());
+
+/* ─── Промежутки между парами ───────────────────────────────── */
+
+/** Длительность одной пары (минуты). */
+export const LESSON_DURATION_MIN = 90;
+
+/**
+ * Порог, выше которого промежуток считается «окном», а не «переменой».
+ * Всё, что <= 40 минут — перемена, всё, что больше — окно.
+ */
+export const BREAK_MAX_MIN = 40;
+
+export type GapKind = 'break' | 'window';
+
+export interface LessonGap {
+  /** Индекс пары СЛЕВА (после которой идёт промежуток). */
+  afterIndex: number;
+  /** Длительность промежутка в минутах. */
+  minutes: number;
+  /** 'break' (<= 40) или 'window' (> 40). */
+  kind: GapKind;
+}
+
+interface TimeRangeLike {
+  time: string;
+}
+
+/**
+ * Считает промежутки между последовательными парами дня.
+ *
+ * Пары должны быть уже отсортированы по времени (как отдаёт
+ * `getLessonsForDate`). Функция не сортирует — это ответственность
+ * вызывающего, чтобы не скрывать баги в порядке.
+ *
+ * Правила:
+ *  - меньше двух пар → пустой массив;
+ *  - промежуток <= 0 (пересечение/вплотную) → промежуток не выводим;
+ *  - 0 < gap <= BREAK_MAX_MIN → 'break';
+ *  - gap > BREAK_MAX_MIN → 'window'.
+ */
+export const getLessonGaps = (lessons: TimeRangeLike[]): LessonGap[] => {
+  if (!Array.isArray(lessons) || lessons.length < 2) return [];
+
+  const gaps: LessonGap[] = [];
+
+  for (let i = 0; i < lessons.length - 1; i++) {
+    const current = lessons[i];
+    const next = lessons[i + 1];
+    if (!current?.time || !next?.time) continue;
+
+    const end = parseTimeToMinutes(current.time) + LESSON_DURATION_MIN;
+    const start = parseTimeToMinutes(next.time);
+    const minutes = start - end;
+
+    if (minutes <= 0) continue;
+
+    gaps.push({
+      afterIndex: i,
+      minutes,
+      kind: minutes > BREAK_MAX_MIN ? 'window' : 'break',
+    });
+  }
+
+  return gaps;
+};

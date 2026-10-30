@@ -119,7 +119,8 @@
 .schedule_lesson__content__wrapper {
   flex: 1;
   min-width: 0;
-  padding-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .schedule_lesson__content {
@@ -132,6 +133,7 @@
   transition: background-color 0.2s ease, transform 0.15s ease;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  /* margin-bottom убран, отступы теперь задаются у break */
 }
 
 .schedule_lesson__content:active {
@@ -188,6 +190,31 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+
+/* --- ПРОМЕЖУТОК ВНУТРИ КАРТОЧКИ --- */
+
+.schedule_lesson__break {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Симметричные отступы сверху и снизу */
+  padding: 0.85rem 0;
+}
+
+.schedule_lesson__break__label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--light-font-color);
+  opacity: 0.7;
+}
+
+.schedule_lesson__break--window .schedule_lesson__break__label {
+  color: var(--primary-color);
+  opacity: 0.85;
 }
 
 /* --- АКТИВНАЯ ПАРА --- */
@@ -273,7 +300,6 @@
   overflow: hidden;
 }
 
-/* Лёгкий точечный паттерн на фоне */
 .schedule-empty::before {
   content: "";
   position: absolute;
@@ -328,7 +354,6 @@
   pointer-events: none;
 }
 
-/* Контейнер картинки: размер и позиция не меняются */
 .schedule-empty__illustration {
   width: 100%;
   height: 100%;

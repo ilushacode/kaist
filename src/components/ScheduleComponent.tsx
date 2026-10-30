@@ -7,7 +7,7 @@ import { AdBanner } from './schedule/AdBanner';
 import { useStore } from '../hooks/useStore';
 import { usePrefetchImage } from '../hooks/usePrefetchImage';
 import { getLessonsForDate } from '../utils/schedule';
-import { formatDM, shiftDate } from '../utils/date';
+import { formatDM, getLessonGaps, shiftDate } from '../utils/date';
 import { EMPTY_SUBTITLES } from '../content/emptySubtitles';
 import { slideVariants, slideTransition } from '../animations/variants';
 import Loader from './LoaderComponent';
@@ -37,6 +37,15 @@ export const ScheduleComponent = ({ selectedDate, onDateChange }: ScheduleCompon
     () => getLessonsForDate(scheduleGroups[selectedGroup ?? ''] ?? [], renderedDate),
     [scheduleGroups, selectedGroup, renderedDate]
   );
+
+  // Промежутки между парами: перемена / окно.
+  const gaps = useMemo(() => getLessonGaps(lessons), [lessons]);
+
+  const gapByAfterIndex = useMemo(() => {
+    const map = new Map<number, (typeof gaps)[number]>();
+    for (const gap of gaps) map.set(gap.afterIndex, gap);
+    return map;
+  }, [gaps]);
 
   const prevDateRef = useRef(selectedDate);
   const swipeBlockRef = useRef(false);
@@ -130,11 +139,17 @@ export const ScheduleComponent = ({ selectedDate, onDateChange }: ScheduleCompon
 
     return (
       <div className="schedule">
-        {lessons.map((lesson, i) => (
-          <div key={`${lesson.subject}-${lesson.time}-${i}`}>
-            <ScheduleLesson date={renderedDate} lesson={lesson} />
-          </div>
-        ))}
+        {lessons.map((lesson, i) => {
+          const gap = gapByAfterIndex.get(i);
+          return (
+            <ScheduleLesson
+              key={`${lesson.subject}-${lesson.time}-${i}`}
+              date={renderedDate}
+              lesson={lesson}
+              gap={gap}
+            />
+          );
+        })}
       </div>
     );
   }, [
@@ -144,6 +159,7 @@ export const ScheduleComponent = ({ selectedDate, onDateChange }: ScheduleCompon
     renderedDate,
     emptySubtitleIndex,
     retryBootstrap,
+    gapByAfterIndex,
   ]);
 
   const adDate = useMemo(() => {

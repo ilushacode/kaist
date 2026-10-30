@@ -5,6 +5,7 @@ import {
   isLessonNow,
   isLessonPast,
   stripLeadingZero,
+  type LessonGap,
 } from '../../utils/date';
 import { formatBuilding } from '../../utils/string';
 import { getLessonTypeLabel } from '../../utils/lesson';
@@ -15,12 +16,46 @@ import type { Lesson } from '../../types';
 const TICK_INTERVAL_MS = 60_000;
 const LESSON_DURATION_MIN = 90;
 
+const formatMinutes = (minutes: number): string => {
+  const n = Math.max(0, Math.round(minutes));
+  const word =
+    n % 10 === 1 && n % 100 !== 11
+      ? 'минута'
+      : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)
+        ? 'минуты'
+        : 'минут';
+  return `${n} ${word}`;
+};
+
+const formatDuration = (minutes: number, isWindow: boolean): string => {
+  if (!isWindow) {
+    return formatMinutes(minutes);
+  }
+
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+
+  if (h === 0) return formatMinutes(m);
+
+  const hWord =
+    h % 10 === 1 && h % 100 !== 11
+      ? 'час'
+      : h % 10 >= 2 && h % 10 <= 4 && (h % 100 < 10 || h % 100 >= 20)
+        ? 'часа'
+        : 'часов';
+
+  if (m === 0) return `${h} ${hWord}`;
+
+  return `${h} ${hWord} ${formatMinutes(m)}`;
+};
+
 interface ScheduleLessonProps {
   lesson: Lesson;
   date: Date;
+  gap?: LessonGap;
 }
 
-export const ScheduleLesson = ({ lesson, date }: ScheduleLessonProps) => {
+export const ScheduleLesson = ({ lesson, date, gap }: ScheduleLessonProps) => {
   const [, tick] = useReducer((n: number) => n + 1, 0);
   const { openModal } = useModal();
 
@@ -79,6 +114,14 @@ export const ScheduleLesson = ({ lesson, date }: ScheduleLessonProps) => {
             </span>
           </div>
         </div>
+
+        {gap && (
+          <div className={`schedule_lesson__break ${gap.kind === 'window' ? 'schedule_lesson__break--window' : ''}`}>
+            <span className="schedule_lesson__break__label">
+              {gap.kind === 'window' ? 'Окно' : 'Перемена'} — {formatDuration(gap.minutes, gap.kind === 'window')}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
