@@ -107,6 +107,20 @@ html, body, #root {
   touch-action: pan-y;
 }
 
+/* Прокручиваемое содержимое шторки.
+   Отдельный скролл-контейнер нужен, чтобы длинная модалка (например, пара
+   с рекламным блоком внизу) не обрезалась, но при этом сама шторка оставалась
+   жёсткой: скругления и жест «потянуть вниз» работают как раньше. */
+.modal-sheet__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
 .modal-sheet__drag-handle {
   flex-shrink: 0;
   width: 36px;

@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import type { ComponentType, ReactNode } from 'react';
@@ -33,11 +34,28 @@ interface ModalState {
 export function ModalProvider({ children }: { children: ReactNode }) {
   const [modal, setModal] = useState<ModalState | null>(null);
 
+  /** Прокручиваемое содержимое шторки (см. `.modal-sheet__body`). */
+  const bodyRef = useRef<HTMLDivElement>(null);
+  /**
+   * Список вверху? Тянуть шторку вниз (закрытие жестом) можно только тогда,
+   * иначе жест «отдать» внутреннему скроллу — иначе свайп закрывал бы модалку
+   * вместо прокрутки.
+   */
+  const [bodyAtTop, setBodyAtTop] = useState(true);
+
+  const handleBodyScroll = useCallback(() => {
+    const el = bodyRef.current;
+    if (!el) return;
+    const atTop = el.scrollTop <= 0;
+    setBodyAtTop((prev) => (prev === atTop ? prev : atTop));
+  }, []);
+
   const openModal = useCallback(
     <P extends object>(
       ModalComponent: ComponentType<P & { closeModal?: () => void }>,
       props: P = {} as P
     ) => {
+      setBodyAtTop(true);
       setModal({
         ModalComponent: ModalComponent as ComponentType<any>,
         props: props as Record<string, unknown>,
@@ -94,14 +112,20 @@ export function ModalProvider({ children }: { children: ReactNode }) {
               animate="animate"
               exit="exit"
               transition={SPRING_MODAL}
-              drag="y"
+              drag={bodyAtTop ? 'y' : false}
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={{ top: 0, bottom: 0.6 }}
               onDragEnd={handleDragEnd}
               onClick={stopPropagation}
             >
               <div className="modal-sheet__drag-handle" />
-              <modal.ModalComponent {...modal.props} closeModal={closeModal} />
+              <div
+                className="modal-sheet__body"
+                ref={bodyRef}
+                onScroll={handleBodyScroll}
+              >
+                <modal.ModalComponent {...modal.props} closeModal={closeModal} />
+              </div>
             </motion.div>
           </motion.div>
         )}
