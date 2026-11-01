@@ -79,9 +79,14 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: ({ request }) =>
-              request.destination === 'style' ||
-              request.destination === 'script',
+            // Только свои файлы. Сторонние скрипты (загрузчик рекламы,
+            // Метрика) кэшировать нельзя: у них нет версионирования в URL,
+            // и StaleWhileRevalidate на 30 дней отдаёт устаревший код —
+            // реклама «то работает, то нет» после обновлений AdFox.
+            urlPattern: ({ request, sameOrigin }) =>
+              sameOrigin &&
+              (request.destination === 'style' ||
+                request.destination === 'script'),
             handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'static-assets',
