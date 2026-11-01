@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useStore } from './useStore';
 import { fetchHashes, type AppHashes } from '../api/hash';
 import { fetchSchedule, fetchExams, fetchStudents } from '../api/data';
-import { fetchAdsData } from '../api/ads';
 import { isCancelError } from '../api/client';
 import { BOOTSTRAP_TIMEOUT_MS } from '../config';
 
@@ -210,32 +209,6 @@ export default function useBootstrap(): boolean {
         } else {
           useStore.getState().setStudentsError(false);
           useStore.getState().setStudentsLoading(false);
-        }
-      }
-
-      if (cancelled) return;
-
-      // 7. Реклама. Сервер не отдаёт хэш — сравниваем локальные хэши
-      //    (до и после получения списка). Пустой список — валидное состояние.
-      {
-        try {
-          const data = await fetchAdsData({
-            signal: controller.signal,
-            timeout: BOOTSTRAP_TIMEOUT_MS,
-          });
-          if (cancelled) return;
-          const current = useStore.getState().adsHash;
-          if (data.contentHash !== current) {
-            useStore.getState().setAdsCache({
-              list: data.list,
-              contentHash: data.contentHash,
-              updatedAt: data.updatedAt,
-            });
-          }
-        } catch (err) {
-          if (!isCancelError(err)) {
-            console.warn('Bootstrap: объявления недоступны.', err);
-          }
         }
       }
 

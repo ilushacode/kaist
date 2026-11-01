@@ -3,10 +3,11 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useSwipeable } from 'react-swipeable';
 import { ScheduleLesson } from './schedule/ScheduleLesson';
 import { ScheduleEmpty } from './schedule/ScheduleEmpty';
-import { AdBanner } from './schedule/AdBanner';
+import { AdBanner } from './AdBanner';
 import { useStore } from '../hooks/useStore';
 import { usePrefetchImage } from '../hooks/usePrefetchImage';
 import { getLessonsForDate } from '../utils/schedule';
+import { getDayBuilding } from '../utils/building';
 import { formatDM, getLessonGaps, shiftDate } from '../utils/date';
 import { EMPTY_SUBTITLES } from '../content/emptySubtitles';
 import { slideVariants, slideTransition } from '../animations/variants';
@@ -27,7 +28,6 @@ export const ScheduleComponent = ({ selectedDate, onDateChange }: ScheduleCompon
   const scheduleError = useStore((s) => s.scheduleError);
   const scheduleLoading = useStore((s) => s.scheduleLoading);
   const retryBootstrap = useStore((s) => s.retryBootstrap);
-  const adsRaw = useStore((s) => s.adsRaw);
 
   const [direction, setDirection] = useState<Direction>(0);
   const [renderedDate, setRenderedDate] = useState<Date>(selectedDate);
@@ -37,6 +37,9 @@ export const ScheduleComponent = ({ selectedDate, onDateChange }: ScheduleCompon
     () => getLessonsForDate(scheduleGroups[selectedGroup ?? ''] ?? [], renderedDate),
     [scheduleGroups, selectedGroup, renderedDate]
   );
+
+  // Здание дня — корпус, в котором больше всего пар в выбранный день.
+  const dayBuilding = useMemo(() => getDayBuilding(lessons), [lessons]);
 
   // Группируем пары по времени начала
   const groupedLessons = useMemo(() => {
@@ -179,15 +182,13 @@ export const ScheduleComponent = ({ selectedDate, onDateChange }: ScheduleCompon
     gapByAfterIndex,
   ]);
 
-  const adDate = useMemo(() => {
-    const d = new Date(renderedDate);
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, [renderedDate]);
-
   return (
     <div className="schedule-viewport-wrapper">
-      <AdBanner adsRaw={adsRaw} group={selectedGroup} today={adDate} />
+      <AdBanner
+        placement="schedule-top"
+        className="ad-banner--page"
+        context={{ building: dayBuilding, group: selectedGroup }}
+      />
 
       <div
         className="schedule-viewport"

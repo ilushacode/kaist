@@ -4,6 +4,8 @@ import { addMinutes, isPastDay, isTodayDay, stripLeadingZero } from '../utils/da
 import { capitalizeName, formatBuilding } from '../utils/string';
 import { getLessonTypeLabel } from '../utils/lesson';
 import { getLessonGroups } from '../utils/schedule';
+import { parseBuilding } from '../utils/building';
+import { AdBanner } from '../components/AdBanner';
 import { useStore } from '../hooks/useStore';
 import { TeacherLink } from '../components/TeacherLink';
 import type { Lesson } from '../types';
@@ -101,6 +103,16 @@ export default function LessonModal({ lesson }: LessonModalProps) {
           </TeacherLink>
         </div>
       </section>
+
+      <AdBanner
+        placement="lesson-bottom"
+        className="ad-banner--modal"
+        context={{
+          keywords: [lesson.subject],
+          building: parseBuilding(lesson.building),
+          group: selectedGroup,
+        }}
+      />
     </div>
   );
 }

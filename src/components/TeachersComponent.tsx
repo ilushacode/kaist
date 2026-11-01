@@ -12,6 +12,7 @@ import { useModal } from '../providers/ModalProvider';
 import TeacherModal from '../modals/TeacherModal';
 import Loader from './LoaderComponent';
 import { SearchToolbar } from './SearchToolbar';
+import { AdBanner } from './AdBanner';
 import '../styles/Teachers.css';
 import '../styles/SearchToolbar.css';
 
@@ -157,6 +158,12 @@ export const TeachersComponent = () => {
         onQueryChange={setQuery}
         open={searchOpen}
         onOpenChange={setSearchOpen}
+      />
+
+      <AdBanner
+        placement="teachers-top"
+        className={searchOpen ? 'ad-banner--hidden' : undefined}
+        context={{ group: selectedGroup }}
       />
 
       <div className="teachers__list">

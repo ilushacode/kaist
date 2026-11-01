@@ -55,7 +55,6 @@ export interface HashesResponse {
     schedule?: string;
     exams?: string;
     students?: string;
-    ads?: string;
   };
 }
 
@@ -73,31 +72,6 @@ export interface ExamsData {
 
 export interface StudentsData {
   groups: Record<string, Student[]>;
-  contentHash: string | null;
-  updatedAt: string | null;
-}
-
-export interface AdRaw {
-  target?: string;
-  caption?: string;
-  image?: string;
-  link?: string;
-  startDate?: string;
-  endDate?: string;
-}
-
-export interface NormalizedAd {
-  id: string;
-  target: string;
-  caption: string;
-  image: string;
-  link: string;
-  startDate: Date | null;
-  endDate: Date | null;
-}
-
-export interface AdsData {
-  list: AdRaw[];
   contentHash: string | null;
   updatedAt: string | null;
 }

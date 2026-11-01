@@ -6,6 +6,7 @@ import Loader from './LoaderComponent';
 import { usePrefetchImage } from '../hooks/usePrefetchImage';
 import { useCopyToClipboard } from '../hooks/useCopyToClipboard';
 import { SearchToolbar } from './SearchToolbar';
+import { AdBanner } from './AdBanner';
 import {
   collectAllStudents,
   formatStudentsForClipboard,
@@ -211,6 +212,12 @@ export const StudentsComponent = () => {
             </button>
           ) : undefined
         }
+      />
+
+      <AdBanner
+        placement="students-top"
+        className={searchOpen ? 'ad-banner--hidden' : undefined}
+        context={{ group: selectedGroup }}
       />
 
       <div className="students__list">

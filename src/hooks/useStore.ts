@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist, createJSONStorage, type StateStorage } from 'zustand/middleware';
 import localforage from 'localforage';
 import type {
-  AdRaw,
   GroupExamRaw,
   GroupScheduleLesson,
   Student,
@@ -19,7 +18,6 @@ const STORAGE_KEY = 'kaist-app-v5';
 const SCHEDULE_CACHE_KEY = 'kaist-schedule-cache';
 const EXAMS_CACHE_KEY = 'kaist-exams-cache';
 const STUDENTS_CACHE_KEY = 'kaist-students-cache';
-const ADS_CACHE_KEY = 'kaist-ads-cache';
 
 const INSTALL_BANNER_DISMISS_KEY = 'install-banner-dismissed-until';
 const INSTALL_BANNER_INSTALLED_KEY = 'install-banner-installed';
@@ -38,12 +36,6 @@ interface ExamsCache {
 
 interface StudentsCache {
   groups: Record<string, Student[]>;
-  contentHash: string | null;
-  updatedAt: string | null;
-}
-
-interface AdsCache {
-  list: AdRaw[];
   contentHash: string | null;
   updatedAt: string | null;
 }
@@ -123,10 +115,6 @@ export interface StoreState {
   studentsLoading: boolean;
   studentsError: boolean;
 
-  adsRaw: AdRaw[];
-  adsHash: string | null;
-  adsUpdatedAt: string | null;
-
   bootstrapRetry: number;
   theme: Theme;
   _hasHydrated: boolean;
@@ -140,7 +128,6 @@ export interface StoreState {
   setScheduleCache: (payload: ScheduleCache) => void;
   setExamsCache: (payload: ExamsCache) => void;
   setStudentsCache: (payload: StudentsCache) => void;
-  setAdsCache: (payload: AdsCache) => void;
 
   loadHeavyCache: () => Promise<void>;
 
@@ -179,10 +166,6 @@ export const useStore = create<StoreState>()(
       studentsUpdatedAt: null,
       studentsLoading: false,
       studentsError: false,
-
-      adsRaw: [],
-      adsHash: null,
-      adsUpdatedAt: null,
 
       bootstrapRetry: 0,
 
@@ -271,25 +254,11 @@ export const useStore = create<StoreState>()(
         });
       },
 
-      setAdsCache: ({ list, contentHash, updatedAt }) => {
-        set({
-          adsRaw: Array.isArray(list) ? list : [],
-          adsHash: contentHash ?? null,
-          adsUpdatedAt: updatedAt ?? null,
-        });
-        void indexedDBAdapter.setItem(ADS_CACHE_KEY, {
-          list: Array.isArray(list) ? list : [],
-          contentHash: contentHash ?? null,
-          updatedAt: updatedAt ?? null,
-        });
-      },
-
       loadHeavyCache: async () => {
-        const [schedule, exams, students, ads] = await Promise.all([
+        const [schedule, exams, students] = await Promise.all([
           indexedDBAdapter.getItem<ScheduleCache>(SCHEDULE_CACHE_KEY),
           indexedDBAdapter.getItem<ExamsCache>(EXAMS_CACHE_KEY),
           indexedDBAdapter.getItem<StudentsCache>(STUDENTS_CACHE_KEY),
-          indexedDBAdapter.getItem<AdsCache>(ADS_CACHE_KEY),
         ]);
 
         set((state) => ({
@@ -302,9 +271,6 @@ export const useStore = create<StoreState>()(
           studentsGroups: students?.groups ?? state.studentsGroups,
           studentsHash: students?.contentHash ?? state.studentsHash,
           studentsUpdatedAt: students?.updatedAt ?? state.studentsUpdatedAt,
-          adsRaw: ads?.list ?? state.adsRaw,
-          adsHash: ads?.contentHash ?? state.adsHash,
-          adsUpdatedAt: ads?.updatedAt ?? state.adsUpdatedAt,
         }));
       },
 
@@ -350,9 +316,6 @@ export const useStore = create<StoreState>()(
           studentsUpdatedAt: null,
           studentsLoading: false,
           studentsError: false,
-          adsRaw: [],
-          adsHash: null,
-          adsUpdatedAt: null,
           bootstrapRetry: 0,
           theme: 'auto',
         });
@@ -361,7 +324,6 @@ export const useStore = create<StoreState>()(
           indexedDBAdapter.removeItem(SCHEDULE_CACHE_KEY),
           indexedDBAdapter.removeItem(EXAMS_CACHE_KEY),
           indexedDBAdapter.removeItem(STUDENTS_CACHE_KEY),
-          indexedDBAdapter.removeItem(ADS_CACHE_KEY),
           indexedDBAdapter.removeItem(STORAGE_KEY),
         ]);
 
@@ -378,7 +340,7 @@ export const useStore = create<StoreState>()(
     {
       name: STORAGE_KEY,
       storage: createJSONStorage(() => localStorageAdapter),
-      version: 8,
+      version: 9,
       partialize: (s) => ({
         groups: s.groups,
         selectedGroup: s.selectedGroup,
@@ -427,6 +389,12 @@ export const useStore = create<StoreState>()(
           delete (p as { studentsGroups?: unknown }).studentsGroups;
           delete (p as { studentsHash?: unknown }).studentsHash;
           delete (p as { studentsUpdatedAt?: unknown }).studentsUpdatedAt;
+          delete (p as { adsRaw?: unknown }).adsRaw;
+          delete (p as { adsHash?: unknown }).adsHash;
+          delete (p as { adsUpdatedAt?: unknown }).adsUpdatedAt;
+        }
+        // v9: реклама переехала на AdFox, локальный кэш объявлений больше не нужен.
+        if (p) {
           delete (p as { adsRaw?: unknown }).adsRaw;
           delete (p as { adsHash?: unknown }).adsHash;
           delete (p as { adsUpdatedAt?: unknown }).adsUpdatedAt;

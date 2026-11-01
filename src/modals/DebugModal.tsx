@@ -33,17 +33,14 @@ export default function DebugModal() {
   const scheduleGroups = useStore((s) => s.scheduleGroups);
   const examsGroups = useStore((s) => s.examsGroups);
   const studentsGroups = useStore((s) => s.studentsGroups);
-  const adsRaw = useStore((s) => s.adsRaw);
 
   const scheduleHash = useStore((s) => s.scheduleHash);
   const examsHash = useStore((s) => s.examsHash);
   const studentsHash = useStore((s) => s.studentsHash);
-  const adsHash = useStore((s) => s.adsHash);
 
   const scheduleUpdatedAt = useStore((s) => s.scheduleUpdatedAt);
   const examsUpdatedAt = useStore((s) => s.examsUpdatedAt);
   const studentsUpdatedAt = useStore((s) => s.studentsUpdatedAt);
-  const adsUpdatedAt = useStore((s) => s.adsUpdatedAt);
 
   const handleCopyId = async () => {
     const ok = await copy(deviceId);
@@ -67,9 +64,8 @@ export default function DebugModal() {
       { label: 'Расписание', value: shortenHash(scheduleHash), rawValue: scheduleHash },
       { label: 'Экзамены', value: shortenHash(examsHash), rawValue: examsHash },
       { label: 'Студенты', value: shortenHash(studentsHash), rawValue: studentsHash },
-      { label: 'Реклама', value: shortenHash(adsHash), rawValue: adsHash },
     ],
-    [scheduleHash, examsHash, studentsHash, adsHash]
+    [scheduleHash, examsHash, studentsHash]
   );
 
   const metrics: MetricRow[] = useMemo(() => {
@@ -91,8 +87,6 @@ export default function DebugModal() {
       0
     );
 
-    const adsCount = Array.isArray(adsRaw) ? adsRaw.length : 0;
-
     return [
       { label: 'Группы с расписанием', value: fmt(scheduleGroupCount) },
       { label: 'Пар всего', value: fmt(lessonsCount) },
@@ -100,18 +94,16 @@ export default function DebugModal() {
       { label: 'Экзаменов всего', value: fmt(examsCount) },
       { label: 'Группы со студентами', value: fmt(studentsGroupCount) },
       { label: 'Студентов всего', value: fmt(studentsCount) },
-      { label: 'Объявлений', value: fmt(adsCount) },
     ];
-  }, [scheduleGroups, examsGroups, studentsGroups, adsRaw]);
+  }, [scheduleGroups, examsGroups, studentsGroups]);
 
   const updatedAt: MetricRow[] = useMemo(
     () => [
       { label: 'Расписание', value: scheduleUpdatedAt ?? '—' },
       { label: 'Экзамены', value: examsUpdatedAt ?? '—' },
       { label: 'Студенты', value: studentsUpdatedAt ?? '—' },
-      { label: 'Реклама', value: adsUpdatedAt ?? '—' },
     ],
-    [scheduleUpdatedAt, examsUpdatedAt, studentsUpdatedAt, adsUpdatedAt]
+    [scheduleUpdatedAt, examsUpdatedAt, studentsUpdatedAt]
   );
 
   const handleReset = async () => {
@@ -220,8 +212,8 @@ export default function DebugModal() {
 
         <div className="debug_modal__danger">
           <p className="debug_modal__danger__text">
-            Сброс удалит избранные группы, кэши расписания, экзаменов,
-            студентов и рекламы, а также настройки темы и install-баннера.
+            Сброс удалит избранные группы, кэши расписания, экзаменов и
+            студентов, а также настройки темы и install-баннера.
             После этого страница перезагрузится.
           </p>
           <button

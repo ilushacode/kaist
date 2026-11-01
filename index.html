@@ -10,6 +10,37 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
+    <!--
+      AdFox / РСЯ: загрузчик ставится один раз и обслуживает все блоки.
+      Грузим его только на боевом хосте: на localhost/превью/IP реклама не
+      запрашивается, чтобы тестовые открытия не уходили в статистику AdFox
+      (и не считались невалидным трафиком). Проверить локально: ?ads=1
+    -->
+    <script>
+      window.yaContextCb = window.yaContextCb || [];
+      (function () {
+        var force = /[?&]ads=1(&|#|$)/.test(location.search);
+        var host = location.hostname;
+        var isNonProduction =
+          location.protocol === 'file:' ||
+          host === 'localhost' ||
+          host === '::1' ||
+          host === '[::1]' ||
+          /^(127|10)\./.test(host) ||
+          /^192\.168\./.test(host) ||
+          /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
+          /\.(local|localhost|test|invalid)$/.test(host);
+
+        if (isNonProduction && !force) return;
+
+        window.__adsEnabled = true;
+        var script = document.createElement('script');
+        script.src = 'https://yandex.ru/ads/system/context.js';
+        script.async = true;
+        document.head.appendChild(script);
+      })();
+    </script>
+
     <!-- Основные теги -->
     <title>КАИСТ — Расписание для студентов КНИТУ-КАИ</title>
     <meta

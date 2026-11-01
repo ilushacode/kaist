@@ -8,7 +8,6 @@ export interface AppHashes {
   schedule: string | null;
   exams: string | null;
   students: string | null;
-  ads: string | null;
 }
 
 const pick = (v: unknown): string | null => {
@@ -26,6 +25,5 @@ export const fetchHashes = async (
     schedule: pick(h.schedule),
     exams: pick(h.exams),
     students: pick(h.students),
-    ads: pick(h.ads),
   };
 };
