@@ -14,12 +14,14 @@
       AdFox / РСЯ: загрузчик ставится один раз и обслуживает все блоки.
       Грузим его только на боевом хосте: на localhost/превью/IP реклама не
       запрашивается, чтобы тестовые открытия не уходили в статистику AdFox
-      (и не считались невалидным трафиком). Проверить локально: ?ads=1
+      (и не считались невалидным трафиком). Проверить локально: ?with-ads
+      (старый вариант ?ads=1 тоже поддерживается).
     -->
     <script>
       window.yaContextCb = window.yaContextCb || [];
       (function () {
-        var force = /[?&]ads=1(&|#|$)/.test(location.search);
+        var force =
+          /[?&](?:with-ads(?:=[^&#]*)?|ads=1)(?:&|#|$)/.test(location.search);
         var host = location.hostname;
         var isNonProduction =
           location.protocol === 'file:' ||

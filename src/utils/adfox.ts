@@ -13,7 +13,7 @@ import type { AdfoxUnit } from '../config';
  *
  * Загрузчик подключается только на боевом домене: на localhost/превью он не
  * грузится, чтобы тестовые открытия не попадали в статистику AdFox. Принудительно
- * включить локально — `?ads=1`.
+ * включить локально — `?with-ads` (старый вариант `?ads=1` тоже поддерживается).
  */
 export const isAdsEnabled = (): boolean => {
   if (typeof window === 'undefined') return false;
