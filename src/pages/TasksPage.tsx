@@ -1,0 +1,14 @@
+import { motion } from 'motion/react';
+import { HeaderComponent } from '../components/HeaderComponent';
+import { TasksComponent } from '../components/TasksComponent';
+import { pageVariants, PAGE_TRANSITION } from '../animations/presets';
+
+export function TasksPage() {
+  return (
+    <motion.div className="tasks-page-wrapper" style={{ flex: 1 }}
+      variants={pageVariants} initial="initial" animate="animate" exit="exit" transition={PAGE_TRANSITION}>
+      <HeaderComponent title="Задачи" backButton />
+      <TasksComponent />
+    </motion.div>
+  );
+}

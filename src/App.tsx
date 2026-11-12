@@ -13,6 +13,7 @@ import { SchedulePage } from './pages/SchedulePage';
 import { StudentsPage } from './pages/StudentsPage';
 import { TeachersPage } from './pages/TeachersPage';
 import { ExamsPage } from './pages/ExamsPage';
+import { TasksPage } from './pages/TasksPage';
 import { InstallBanner } from './components/InstallBannerComponent';
 import { compareDay, getMondayOfWeek, shiftDate } from './utils/date';
 import { useTheme } from './hooks/useTheme';
@@ -156,6 +157,7 @@ function App() {
           <Route path="/students" element={<StudentsPage />} />
           <Route path="/teachers" element={<TeachersPage />} />
           <Route path="/exams" element={<ExamsPage />} />
+          <Route path="/tasks" element={<TasksPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>

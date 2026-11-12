@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { UserGroup, GraduationCap, BookOpenText, Send } from 'lucide-react';
+import { UserGroup, GraduationCap, BookOpenText, ListTodo, Send } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import { useModal } from '../providers/ModalProvider';
 import GroupsModal from './GroupsModal';
@@ -22,6 +22,7 @@ const MAIN_ITEMS: MainItem[] = [
   { icon: UserGroup, color: '#db960c', title: 'Одногруппники', path: '/students' },
   { icon: GraduationCap, color: '#ac2eeb', title: 'Преподаватели', path: '/teachers' },
   { icon: BookOpenText, color: '#0cdb39', title: 'Экзамены', path: '/exams' },
+  { icon: ListTodo, color: '#168b91', title: 'Задачи', path: '/tasks' },
 ];
 
 export default function MenuModal() {

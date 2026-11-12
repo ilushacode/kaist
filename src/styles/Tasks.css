@@ -1,0 +1,52 @@
+/* ЗАДАЧИ */
+.tasks-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.tasks {
+  flex: 1;
+  min-height: 0;
+  padding: 0.5rem 1rem 2rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tasks::-webkit-scrollbar { display: none; }
+.tasks__day + .tasks__day { margin-top: 1.5rem; }
+
+.tasks__date {
+  margin: 0 0 0.8rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--primary-color);
+}
+
+.tasks__list { display: flex; flex-direction: column; gap: 0.6rem; list-style: none; }
+.tasks__card { padding: 0.9rem 1rem; border-radius: 1rem; background: var(--accent-background-color); }
+.tasks__lesson { display: flex; flex-direction: column; gap: 0.15rem; margin-bottom: 0.6rem; font-size: 0.75rem; line-height: 1.4; overflow-wrap: anywhere; }
+.tasks__type { color: var(--light-font-color); opacity: 0.65; font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+.tasks__subject { color: var(--font-color); font-size: 0.9rem; font-weight: 500; line-height: 1.35; }
+.tasks__text { margin: 0; font-size: 1rem; line-height: 1.5; color: var(--font-color); white-space: pre-wrap; overflow-wrap: anywhere; }
+.tasks__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  padding-bottom: 15%;
+  gap: 0.75rem;
+  text-align: center;
+}
+.tasks__empty-image { width: 60%; max-width: 200px; aspect-ratio: 1; margin-bottom: 0.5rem; }
+.tasks__empty-title { margin: 0; font-size: 1.5rem; font-weight: 500; color: var(--font-color); }
+.tasks__empty-subtitle { margin: 0; font-size: 1rem; color: var(--light-font-color); }
