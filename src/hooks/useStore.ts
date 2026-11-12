@@ -40,6 +40,12 @@ interface StudentsCache {
   updatedAt: string | null;
 }
 
+// Счётчик позволяет действию заметки сообщить об ошибке синхронной записи.
+let storageWriteFailures = 0;
+
+export const getSubjectKey = (subject: string): string =>
+  subject.trim().replace(/\s+/g, ' ').toLowerCase();
+
 const localStorageAdapter: StateStorage = {
   getItem: (name) => {
     try {
@@ -53,6 +59,7 @@ const localStorageAdapter: StateStorage = {
     try {
       localStorage.setItem(name, JSON.stringify(value));
     } catch (e) {
+      storageWriteFailures += 1;
       console.warn('localStorage setItem failed:', e);
     }
   },
@@ -94,6 +101,8 @@ const sanitizeGroup = (raw: unknown): string =>
   String(raw ?? '').replace(/\D/g, '').slice(0, 4);
 
 export interface StoreState {
+  subjectNotes: Record<string, Record<string, string>>;
+  setSubjectNote: (group: string, subject: string, text: string) => boolean;
   groups: string[];
   selectedGroup: string | null;
 
@@ -146,6 +155,19 @@ export interface StoreState {
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
+      subjectNotes: {},
+      setSubjectNote: (group, subject, text) => {
+        const key = getSubjectKey(subject);
+        if (!/^\d{4}$/.test(group) || !key) return false;
+        const notes = { ...get().subjectNotes };
+        const groupNotes = { ...notes[group], [key]: text };
+        if (!text) delete groupNotes[key];
+        if (Object.keys(groupNotes).length) notes[group] = groupNotes;
+        else delete notes[group];
+        const failuresBefore = storageWriteFailures;
+        set({ subjectNotes: notes });
+        return failuresBefore === storageWriteFailures;
+      },
       groups: [],
       selectedGroup: null,
 
@@ -299,6 +321,7 @@ export const useStore = create<StoreState>()(
 
       resetAll: async () => {
         set({
+          subjectNotes: {},
           groups: [],
           selectedGroup: null,
           scheduleGroups: {},
@@ -340,8 +363,9 @@ export const useStore = create<StoreState>()(
     {
       name: STORAGE_KEY,
       storage: createJSONStorage(() => localStorageAdapter),
-      version: 9,
+      version: 10,
       partialize: (s) => ({
+        subjectNotes: s.subjectNotes,
         groups: s.groups,
         selectedGroup: s.selectedGroup,
         theme: s.theme,
@@ -354,6 +378,8 @@ export const useStore = create<StoreState>()(
           scheduleCache?: unknown;
           lastFetchedAt?: unknown;
         };
+        // v10: личные заметки по предметам, отдельно для каждой группы.
+        if (version < 10 && p) p.subjectNotes = {};
         if (version < 2 && p?.groups) {
           p.groups = p.groups.map((g: unknown) =>
             typeof g === 'string' ? g : (g as { number?: string })?.number ?? ''

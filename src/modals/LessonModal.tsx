@@ -1,12 +1,12 @@
-import { useMemo } from 'react';
-import { GraduationCap, ChevronRight } from 'lucide-react';
+import { useId, useMemo, useState } from 'react';
+import { GraduationCap, ChevronRight, ChevronDown } from 'lucide-react';
 import { addMinutes, isPastDay, isTodayDay, stripLeadingZero } from '../utils/date';
 import { capitalizeName, formatBuilding } from '../utils/string';
 import { getLessonTypeLabel } from '../utils/lesson';
 import { getLessonGroups } from '../utils/schedule';
 import { parseBuilding } from '../utils/building';
 import { AdBanner } from '../components/AdBanner';
-import { useStore } from '../hooks/useStore';
+import { getSubjectKey, useStore } from '../hooks/useStore';
 import { TeacherLink } from '../components/TeacherLink';
 import type { Lesson } from '../types';
 import '../styles/LessonModal.css';
@@ -15,9 +15,16 @@ const LESSON_DURATION_MIN = 90;
 
 interface LessonModalProps {
   lesson: Lesson;
+  group: string | null;
 }
 
-export default function LessonModal({ lesson }: LessonModalProps) {
+export default function LessonModal({ lesson, group }: LessonModalProps) {
+  const noteId = useId();
+  const [saveError, setSaveError] = useState(false);
+  const subjectKey = getSubjectKey(lesson.subject);
+  const note = useStore((s) => group ? s.subjectNotes[group]?.[subjectKey] ?? '' : '');
+  const [noteOpen, setNoteOpen] = useState(() => Boolean(note));
+  const setSubjectNote = useStore((s) => s.setSubjectNote);
   const dates = Array.isArray(lesson.dates) ? lesson.dates : [];
   const scheduleGroups = useStore((s) => s.scheduleGroups);
   const selectedGroup = useStore((s) => s.selectedGroup);
@@ -103,6 +110,57 @@ export default function LessonModal({ lesson }: LessonModalProps) {
           </TeacherLink>
         </div>
       </section>
+
+      {group && subjectKey && (
+        <section className="lesson_modal__section">
+          <button
+            type="button"
+            className="lesson_modal__note-toggle"
+            aria-expanded={noteOpen}
+            aria-controls={`${noteId}-panel`}
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={() => setNoteOpen((open) => !open)}
+          >
+            <span id={`${noteId}-label`} className="lesson_modal__section__label">Заметка</span>
+            <ChevronDown
+              size={18}
+              strokeWidth={1.6}
+              className="lesson_modal__note-chevron"
+              aria-hidden="true"
+            />
+          </button>
+          <div
+            id={`${noteId}-panel`}
+            className={'lesson_modal__note-panel' + (noteOpen ? ' lesson_modal__note-panel--open' : '')}
+            aria-hidden={!noteOpen}
+            inert={!noteOpen}
+          >
+            <div className="lesson_modal__note-content">
+              <div className="lesson_modal__note-body">
+                <textarea
+                  id={noteId}
+                  aria-labelledby={`${noteId}-label`}
+                  className="lesson_modal__note"
+                  placeholder="Добавить заметку…"
+                  rows={3}
+                  value={note}
+                  aria-invalid={saveError || undefined}
+                  aria-describedby={saveError ? `${noteId}-error` : undefined}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onChange={(event) => {
+                    setSaveError(!setSubjectNote(group, lesson.subject, event.target.value));
+                  }}
+                />
+                {saveError && (
+                  <p id={`${noteId}-error`} className="lesson_modal__note-error" role="alert">
+                    Не удалось сохранить заметку на устройстве. Попробуйте ещё раз.
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       <AdBanner
         placement="lesson-bottom"

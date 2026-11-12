@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useStore } from '../useStore';
 
 beforeEach(async () => {
@@ -6,6 +6,61 @@ beforeEach(async () => {
 });
 
 describe('useStore', () => {
+  describe('subjectNotes', () => {
+    it('объединяет предмет по названию и разделяет заметки групп', () => {
+      const { setSubjectNote } = useStore.getState();
+      setSubjectNote('3439', ' Высшая   математика ', 'Задачи 5–10');
+      setSubjectNote('4191', 'Высшая математика', 'Контрольная');
+      expect(useStore.getState().subjectNotes).toEqual({
+        '3439': { 'высшая математика': 'Задачи 5–10' },
+        '4191': { 'высшая математика': 'Контрольная' },
+      });
+      useStore.getState().selectGroup('4191');
+      useStore.getState().removeGroup('3439');
+      expect(useStore.getState().subjectNotes['3439']['высшая математика']).toBe('Задачи 5–10');
+    });
+
+    it('восстанавливает заметки из localStorage и удаляет очищенную заметку', async () => {
+      useStore.getState().setSubjectNote('3439', 'Математика', 'Текст\nзаметки');
+      // Меняем только память, не перезаписывая сохранённые данные.
+      useStore.getState().subjectNotes = {};
+      await useStore.persist.rehydrate();
+      expect(useStore.getState().subjectNotes['3439']['математика']).toBe('Текст\nзаметки');
+      useStore.getState().setSubjectNote('3439', 'Математика', '');
+      expect(useStore.getState().subjectNotes).toEqual({});
+    });
+
+    it('мигрирует v9, сохраняя группу и тему', () => {
+      const migrated = useStore.persist.getOptions().migrate?.({
+        groups: ['3439'], selectedGroup: '3439', theme: 'dark',
+      }, 9);
+      expect(migrated).toMatchObject({
+        groups: ['3439'], selectedGroup: '3439', theme: 'dark', subjectNotes: {},
+      });
+    });
+
+    it('сообщает об ошибке записи, оставляя введённый текст в памяти', () => {
+      const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+        throw new DOMException('Нет места', 'QuotaExceededError');
+      });
+      try {
+        expect(useStore.getState().setSubjectNote('3439', 'Математика', 'Текст')).toBe(false);
+        expect(useStore.getState().subjectNotes['3439']['математика']).toBe('Текст');
+      } finally {
+        write.mockRestore();
+        warning.mockRestore();
+      }
+      expect(useStore.getState().setSubjectNote('3439', 'Математика', 'Текст')).toBe(true);
+    });
+
+    it('удаляет заметки при полном сбросе', async () => {
+      useStore.getState().setSubjectNote('3439', 'Математика', 'Текст');
+      await useStore.getState().resetAll();
+      await useStore.persist.rehydrate();
+      expect(useStore.getState().subjectNotes).toEqual({});
+    });
+  });
   describe('addGroup', () => {
     it('добавляет группу, если она есть в кэше', () => {
       useStore.setState({ scheduleGroups: { '3439': [] } });

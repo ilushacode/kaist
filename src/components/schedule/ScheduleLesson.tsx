@@ -11,6 +11,7 @@ import { formatBuilding } from '../../utils/string';
 import { getLessonTypeLabel } from '../../utils/lesson';
 import { useModal } from '../../providers/ModalProvider';
 import LessonModal from '../../modals/LessonModal';
+import { useStore } from '../../hooks/useStore';
 import type { Lesson } from '../../types';
 
 const TICK_INTERVAL_MS = 60_000;
@@ -76,7 +77,7 @@ export const ScheduleLesson = ({ lessons, date, gap }: ScheduleLessonProps) => {
     .join(' ');
 
   const handleLessonClick = (lesson: Lesson) => {
-    openModal(LessonModal, { lesson, date });
+    openModal(LessonModal, { lesson, date, group: useStore.getState().selectedGroup });
   };
 
   return (
