@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { useStore } from '../useStore';
 
 beforeEach(async () => {
@@ -6,59 +6,22 @@ beforeEach(async () => {
 });
 
 describe('useStore', () => {
-  describe('subjectNotes', () => {
-    it('объединяет предмет по названию и разделяет заметки групп', () => {
-      const { setSubjectNote } = useStore.getState();
-      setSubjectNote('3439', ' Высшая   математика ', 'Задачи 5–10');
-      setSubjectNote('4191', 'Высшая математика', 'Контрольная');
-      expect(useStore.getState().subjectNotes).toEqual({
-        '3439': { 'высшая математика': 'Задачи 5–10' },
-        '4191': { 'высшая математика': 'Контрольная' },
-      });
-      useStore.getState().selectGroup('4191');
-      useStore.getState().removeGroup('3439');
-      expect(useStore.getState().subjectNotes['3439']['высшая математика']).toBe('Задачи 5–10');
-    });
-
-    it('восстанавливает заметки из localStorage и удаляет очищенную заметку', async () => {
-      useStore.getState().setSubjectNote('3439', 'Математика', 'Текст\nзаметки');
-      // Меняем только память, не перезаписывая сохранённые данные.
-      useStore.getState().subjectNotes = {};
+  describe('lessonTasks', () => {
+    it('сохраняет задачи, восстанавливает и удаляет из памяти', async () => {
+      const task = { id: '1', text: 'Решить задачи' };
+      useStore.getState().setLessonTasks('3439', '19.11', [task]);
+      useStore.getState().lessonTasks = {};
       await useStore.persist.rehydrate();
-      expect(useStore.getState().subjectNotes['3439']['математика']).toBe('Текст\nзаметки');
-      useStore.getState().setSubjectNote('3439', 'Математика', '');
-      expect(useStore.getState().subjectNotes).toEqual({});
-    });
-
-    it('мигрирует v9, сохраняя группу и тему', () => {
-      const migrated = useStore.persist.getOptions().migrate?.({
-        groups: ['3439'], selectedGroup: '3439', theme: 'dark',
-      }, 9);
-      expect(migrated).toMatchObject({
-        groups: ['3439'], selectedGroup: '3439', theme: 'dark', subjectNotes: {},
-      });
-    });
-
-    it('сообщает об ошибке записи, оставляя введённый текст в памяти', () => {
-      const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
-      const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-        throw new DOMException('Нет места', 'QuotaExceededError');
-      });
-      try {
-        expect(useStore.getState().setSubjectNote('3439', 'Математика', 'Текст')).toBe(false);
-        expect(useStore.getState().subjectNotes['3439']['математика']).toBe('Текст');
-      } finally {
-        write.mockRestore();
-        warning.mockRestore();
-      }
-      expect(useStore.getState().setSubjectNote('3439', 'Математика', 'Текст')).toBe(true);
-    });
-
-    it('удаляет заметки при полном сбросе', async () => {
-      useStore.getState().setSubjectNote('3439', 'Математика', 'Текст');
-      await useStore.getState().resetAll();
+      expect(useStore.getState().lessonTasks['3439']['19.11']).toEqual([task]);
+      expect(useStore.getState().lessonTasks['4191']).toBeUndefined();
+      useStore.getState().setLessonTasks('3439', '19.11', []);
       await useStore.persist.rehydrate();
-      expect(useStore.getState().subjectNotes).toEqual({});
+      expect(useStore.getState().lessonTasks).toEqual({});
+    });
+    it('удаляет старые заметки при миграции', () => {
+      const migrated = useStore.persist.getOptions().migrate?.({ subjectNotes: { math: 'Текст' }, groups: ['3439'] }, 11);
+      expect(migrated).toMatchObject({ lessonTasks: {}, groups: ['3439'] });
+      expect(migrated).not.toHaveProperty('subjectNotes');
     });
   });
   describe('addGroup', () => {
@@ -222,9 +185,9 @@ describe('скрытые пары', () => {
     useStore.getState().toggleLessonHidden('3439', 'series');
     expect(useStore.getState().hiddenLessons).toEqual({});
   });
-  it('мигрирует v10 без потери заметок и сбрасывает скрытие', async () => {
+  it('мигрирует v10 и сбрасывает скрытие', async () => {
     expect(useStore.persist.getOptions().migrate?.({ subjectNotes: { '3439': { math: 'note' } } }, 10))
-      .toMatchObject({ hiddenLessons: {}, subjectNotes: { '3439': { math: 'note' } } });
+      .toMatchObject({ hiddenLessons: {}, lessonTasks: {} });
     useStore.getState().toggleLessonHidden('3439', 'series');
     await useStore.getState().resetAll();
     await useStore.persist.rehydrate();

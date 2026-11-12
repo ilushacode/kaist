@@ -224,106 +224,16 @@
   opacity: 1;
   transform: translateX(2px);
 }
-/* ЗАМЕТКА */
-
-.lesson_modal__note-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  width: 100%;
-  min-height: 2.75rem;
-  margin: -0.75rem 0 -0.5rem;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--light-font-color);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.lesson_modal__note-toggle .lesson_modal__section__label {
-  margin: 0;
-}
-
-.lesson_modal__note-toggle:focus-visible {
-  outline: 2px solid var(--primary-color);
-  outline-offset: 2px;
-  border-radius: 0.3rem;
-}
-
-.lesson_modal__note-chevron {
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
-
-.lesson_modal__note-toggle[aria-expanded='true'] .lesson_modal__note-chevron {
-  transform: rotate(180deg);
-}
-
-.lesson_modal__note-panel {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  margin: 0 -4px;
-  transition: grid-template-rows 0.2s ease, opacity 0.2s ease;
-}
-
-.lesson_modal__note-panel--open {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-
-.lesson_modal__note-content {
-  min-height: 0;
-  overflow: hidden;
-}
-
-.lesson_modal__note-body {
-  padding: 0.85rem 4px 4px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .lesson_modal__note-chevron,
-  .lesson_modal__note-panel {
-    transition: none;
-  }
-}
-
-.lesson_modal__note {
-  display: block;
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 6rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid color-mix(in srgb, var(--light-font-color) 25%, transparent);
-  border-radius: 0.65rem;
-  background: transparent;
-  color: var(--font-color);
-  font: inherit;
-  font-size: 1rem;
-  line-height: 1.5;
-  resize: none;
-  user-select: text;
-  transition: border-color 0.15s ease;
-}
-
-.lesson_modal__note::placeholder {
-  color: var(--light-font-color);
-  opacity: 0.65;
-}
-
-.lesson_modal__note:focus {
-  outline: 2px solid color-mix(in srgb, var(--primary-color) 25%, transparent);
-  outline-offset: 2px;
-  border-color: var(--primary-color);
-}
-
-.lesson_modal__note-error {
-  margin: 0.6rem 0 0;
-  color: var(--light-font-color);
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
+/* ЗАДАЧИ */
+.lesson_tasks__heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; color: var(--light-font-color); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.lesson_tasks__heading .lesson_modal__section__label { margin: 0; }
+.lesson_tasks__add { display: flex; align-items: center; justify-content: center; gap: 0.4rem; width: 100%; padding: 0.65rem; border: 1px solid color-mix(in srgb, var(--light-font-color) 15%, transparent); border-radius: 0.65rem; background: transparent; color: var(--light-font-color); font: inherit; font-size: 0.9rem; cursor: pointer; }
+.lesson_tasks__add:disabled { opacity: 0.45; cursor: default; }
+.lesson_tasks__input { display: block; box-sizing: border-box; width: 100%; padding: 12px; margin-top: 0.6rem; border: 1px solid color-mix(in srgb, var(--primary-color) 40%, transparent); border-radius: 0.65rem; background: transparent; color: var(--font-color); font: inherit; font-size: 1rem; line-height: 24px; resize: none; overflow: hidden; overflow-wrap: anywhere; }
+.lesson_tasks__list { margin-top: 0.6rem; }
+.lesson_tasks__wrapper { overflow: hidden; margin-bottom: 0.6rem; }
+.lesson_tasks__card { display: flex; align-items: flex-start; gap: 0.5rem; padding: 0.75rem; border-radius: 0.65rem; background: color-mix(in srgb, var(--light-font-color) 6%, transparent); }
+.lesson_tasks__text { flex: 1; min-width: 0; margin: 0; color: var(--font-color); font-size: 1rem; line-height: 24px; white-space: pre-wrap; overflow-wrap: anywhere; user-select: none; -webkit-touch-callout: none; }
+.lesson_tasks__copy { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 2rem; height: 2rem; margin: -0.25rem -0.25rem 0 0; border: 0; border-radius: 0.4rem; background: transparent; color: var(--light-font-color); cursor: pointer; }
+.lesson_tasks__error { color: var(--light-font-color); font-size: 0.85rem; line-height: 1.4; }
+.lesson_tasks__add:focus-visible, .lesson_tasks__copy:focus-visible, .lesson_tasks__text:focus-visible, .lesson_tasks__input:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }

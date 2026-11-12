@@ -1,53 +1,57 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import LessonModal from '../LessonModal';
-import { useStore } from '../../hooks/useStore';
+import { getLessonTaskKey, useStore } from '../../hooks/useStore';
 import type { Lesson } from '../../types';
-
 vi.mock('../../components/AdBanner', () => ({ AdBanner: () => null }));
 vi.mock('../../components/TeacherLink', () => ({ TeacherLink: () => null }));
-
 const lesson: Lesson = {
-  subject: 'Высшая математика', time: '08:00', type: 'lecture',
-  teacher: '', department: '', building: '1', room: '101', dates: ['05.11'],
+  subject: 'Математика', time: '08:00', type: 'lec', teacher: '', department: '', building: '1', room: '101', dates: ['12.11', '19.11'],
 };
-
+const date = new Date(2026, 10, 19);
 beforeEach(async () => { await useStore.getState().resetAll(); });
 afterEach(cleanup);
-
-describe('LessonModal: заметки', () => {
-  it('показывает общий текст на других датах и сохраняет привязку к открытой группе', () => {
-    const { unmount } = render(<LessonModal lesson={lesson} group="3439" />);
-    expect(screen.getByRole('button', { name: 'Заметка' })).toHaveAttribute('aria-expanded', 'false');
+describe('Задачи пары', () => {
+  it('сохраняет после потери фокуса и разделяет даты, пары и группы', async () => {
+    const view = render(<LessonModal lesson={lesson} group="3439" date={date} />);
+    expect(screen.getByLabelText('Количество задач')).toHaveTextContent('0');
+    fireEvent.click(screen.getByText('Добавить'));
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Решить задачи' } });
+    fireEvent.blur(screen.getByRole('textbox'));
     expect(screen.queryByRole('textbox')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Заметка' }));
-    fireEvent.change(screen.getByLabelText('Заметка'), { target: { value: 'Решить задачи' } });
-    act(() => useStore.getState().selectGroup('4191'));
-    fireEvent.change(screen.getByLabelText('Заметка'), { target: { value: 'Повторить тему' } });
-    unmount();
-    const next = render(<LessonModal lesson={{ ...lesson, dates: ['12.11'], type: 'practice' }} group="3439" />);
-    expect(screen.getByRole('button', { name: 'Заметка' })).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByLabelText('Заметка')).toHaveValue('Повторить тему');
-    next.unmount();
-    render(<LessonModal lesson={lesson} group="4191" />);
-    expect(screen.getByLabelText('Заметка')).toHaveValue('');
+    expect(screen.getByText('Решить задачи')).toBeInTheDocument();
+    expect(screen.getByLabelText('Количество задач')).toHaveTextContent('1');
+    view.unmount();
+    useStore.getState().lessonTasks = {};
+    await useStore.persist.rehydrate();
+    const next = render(<LessonModal lesson={lesson} group="3439" date={date} />);
+    expect(screen.getByText('Решить задачи')).toBeInTheDocument();
+    next.rerender(<LessonModal lesson={lesson} group="3439" date={new Date(2026, 10, 12)} />);
+    expect(screen.queryByText('Решить задачи')).toBeNull();
+    next.rerender(<LessonModal lesson={{ ...lesson, time: '10:00' }} group="3439" date={date} />);
+    expect(screen.queryByText('Решить задачи')).toBeNull();
+    next.rerender(<LessonModal lesson={lesson} group="4191" date={date} />);
+    expect(screen.queryByText('Решить задачи')).toBeNull();
   });
-
-  it('сворачивает и раскрывает поле, сохраняя текст и ручной выбор после очистки', () => {
-    useStore.getState().setSubjectNote('3439', lesson.subject, 'Задачи');
-    render(<LessonModal lesson={lesson} group="3439" />);
-    const toggle = screen.getByRole('button', { name: 'Заметка' });
-    fireEvent.click(toggle);
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('textbox')).toBeNull();
-    fireEvent.click(toggle);
-    expect(screen.getByRole('textbox')).toHaveValue('Задачи');
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: '' } });
-    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  it('копирует текст и удаляет задачу клавишей Delete из хранилища', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    useStore.getState().setLessonTasks('3439', getLessonTaskKey(lesson, date), [{ id: '1', text: 'ДЗ' }]);
+    render(<LessonModal lesson={lesson} group="3439" date={date} />);
+    fireEvent.click(screen.getByLabelText('Копировать задачу'));
+    expect(await screen.findByLabelText('Скопировано')).toBeInTheDocument();
+    expect(writeText).toHaveBeenCalledWith('ДЗ');
+    fireEvent.keyDown(screen.getByText('ДЗ'), { key: 'Delete' });
+    expect(useStore.getState().lessonTasks).toEqual({});
+    await useStore.persist.rehydrate();
+    expect(useStore.getState().lessonTasks).toEqual({});
   });
-
-  it('не показывает поле без группы', () => {
-    render(<LessonModal lesson={lesson} group={null} />);
-    expect(screen.queryByRole('textbox')).toBeNull();
+  it('не принимает четвёртую строку', () => {
+    render(<LessonModal lesson={lesson} group="3439" date={date} />);
+    fireEvent.click(screen.getByText('Добавить'));
+    const field = screen.getByRole('textbox');
+    fireEvent.change(field, { target: { value: '1\n2\n3' } });
+    fireEvent.change(field, { target: { value: '1\n2\n3\n4' } });
+    expect(field).toHaveValue('1\n2\n3');
   });
 });

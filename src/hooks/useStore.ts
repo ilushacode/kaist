@@ -6,6 +6,7 @@ import type {
   GroupScheduleLesson,
   Student,
   Theme,
+  Lesson,
 } from '../types';
 
 localforage.config({
@@ -40,11 +41,16 @@ interface StudentsCache {
   updatedAt: string | null;
 }
 
-// Счётчик позволяет действию заметки сообщить об ошибке синхронной записи.
+// Счётчик позволяет действию задачи сообщить об ошибке синхронной записи.
 let storageWriteFailures = 0;
 
-export const getSubjectKey = (subject: string): string =>
-  subject.trim().replace(/\s+/g, ' ').toLowerCase();
+export interface LessonTask { id: string; text: string }
+
+export const getLessonTaskKey = (lesson: Lesson, date: Date): string =>
+  JSON.stringify([
+    `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+    lesson.seriesKey ?? [lesson.subject, lesson.type, lesson.time, lesson.teacher, lesson.room, lesson.building],
+  ]);
 
 const localStorageAdapter: StateStorage = {
   getItem: (name) => {
@@ -103,8 +109,8 @@ const sanitizeGroup = (raw: unknown): string =>
 export interface StoreState {
   hiddenLessons: Record<string, Record<string, true>>;
   toggleLessonHidden: (group: string, seriesKey: string) => void;
-  subjectNotes: Record<string, Record<string, string>>;
-  setSubjectNote: (group: string, subject: string, text: string) => boolean;
+  lessonTasks: Record<string, Record<string, LessonTask[]>>;
+  setLessonTasks: (group: string, key: string, tasks: LessonTask[]) => boolean;
   groups: string[];
   selectedGroup: string | null;
 
@@ -170,17 +176,17 @@ export const useStore = create<StoreState>()(
           return { hiddenLessons };
         });
       },
-      subjectNotes: {},
-      setSubjectNote: (group, subject, text) => {
-        const key = getSubjectKey(subject);
+      lessonTasks: {},
+      setLessonTasks: (group, key, tasks) => {
         if (!/^\d{4}$/.test(group) || !key) return false;
-        const notes = { ...get().subjectNotes };
-        const groupNotes = { ...notes[group], [key]: text };
-        if (!text) delete groupNotes[key];
-        if (Object.keys(groupNotes).length) notes[group] = groupNotes;
-        else delete notes[group];
+        const lessonTasks = { ...get().lessonTasks };
+        const entries = { ...lessonTasks[group] };
+        if (tasks.length) entries[key] = tasks;
+        else delete entries[key];
+        if (Object.keys(entries).length) lessonTasks[group] = entries;
+        else delete lessonTasks[group];
         const failuresBefore = storageWriteFailures;
-        set({ subjectNotes: notes });
+        set({ lessonTasks });
         return failuresBefore === storageWriteFailures;
       },
       groups: [],
@@ -337,7 +343,7 @@ export const useStore = create<StoreState>()(
       resetAll: async () => {
         set({
           hiddenLessons: {},
-          subjectNotes: {},
+          lessonTasks: {},
           groups: [],
           selectedGroup: null,
           scheduleGroups: {},
@@ -379,10 +385,10 @@ export const useStore = create<StoreState>()(
     {
       name: STORAGE_KEY,
       storage: createJSONStorage(() => localStorageAdapter),
-      version: 11,
+      version: 12,
       partialize: (s) => ({
         hiddenLessons: s.hiddenLessons,
-        subjectNotes: s.subjectNotes,
+        lessonTasks: s.lessonTasks,
         groups: s.groups,
         selectedGroup: s.selectedGroup,
         theme: s.theme,
@@ -396,8 +402,11 @@ export const useStore = create<StoreState>()(
           lastFetchedAt?: unknown;
         };
         if (version < 11 && p) p.hiddenLessons = {};
-        // v10: личные заметки по предметам, отдельно для каждой группы.
-        if (version < 10 && p) p.subjectNotes = {};
+        // v12: задачи относятся к конкретной дате пары, старые заметки удаляются.
+        if (version < 12 && p) {
+          p.lessonTasks = {};
+          delete (p as { subjectNotes?: unknown }).subjectNotes;
+        }
         if (version < 2 && p?.groups) {
           p.groups = p.groups.map((g: unknown) =>
             typeof g === 'string' ? g : (g as { number?: string })?.number ?? ''
