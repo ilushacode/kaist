@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useSwipeable } from 'react-swipeable';
 import { ScheduleLesson } from './schedule/ScheduleLesson';
 import { ScheduleEmpty } from './schedule/ScheduleEmpty';
+import { ScheduleDateRow } from './schedule/ScheduleDateRow';
 import { AdBanner } from './AdBanner';
 import { useStore } from '../hooks/useStore';
 import { usePrefetchImage } from '../hooks/usePrefetchImage';
@@ -189,6 +190,8 @@ export const ScheduleComponent = ({ selectedDate, onDateChange }: ScheduleCompon
         className="ad-banner--page"
         context={{ building: dayBuilding, group: selectedGroup }}
       />
+
+      <ScheduleDateRow selectedDate={selectedDate} onDateChange={onDateChange} />
 
       <div
         className="schedule-viewport"

@@ -16,6 +16,55 @@
   overflow: hidden;
 }
 
+.schedule-date-row {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--light-font-color) 45%, transparent);
+}
+
+.schedule-date-row__date {
+  min-height: 36px;
+  padding: 0 0.5rem;
+  margin-left: -0.5rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  outline: none;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.schedule-date-row__date:disabled {
+  cursor: default;
+}
+
+.schedule-date-row__parity {
+  color: inherit;
+}
+
+/* Без рекламы поднимаем строку ближе к ленте дней, сохраняя область нажатия. */
+.schedule-viewport-wrapper:has(> .ad-banner:not(:has([data-ready='true']))) > .schedule-date-row {
+  margin-top: -0.5rem;
+}
+
+.schedule-viewport .schedule {
+  padding-top: 0.25rem;
+}
+
 .schedule-viewport {
   position: relative;
   flex: 1;

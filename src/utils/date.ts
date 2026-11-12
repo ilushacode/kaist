@@ -58,6 +58,21 @@ export const getMondayOfWeek = (date: Date): Date => {
   return d;
 };
 
+/**
+ * Чётность учебной недели: год начинается 1 сентября, недели идут с понедельника.
+ * Неделя, содержащая 1 сентября, — первая (нечётная), без сброса в январе/феврале.
+ */
+export const isEvenAcademicWeek = (date: Date): boolean => {
+  const year = date.getFullYear() - (date.getMonth() < 8 ? 1 : 0);
+  const startMonday = getMondayOfWeek(new Date(year, 8, 1));
+  const monday = getMondayOfWeek(date);
+  // Сравниваем календарные даты в UTC, чтобы переходы часового пояса не влияли на счёт.
+  const start = Date.UTC(startMonday.getFullYear(), startMonday.getMonth(), startMonday.getDate());
+  const current = Date.UTC(monday.getFullYear(), monday.getMonth(), monday.getDate());
+  const weekIndex = (current - start) / (7 * 24 * 60 * 60 * 1000);
+  return weekIndex % 2 === 1;
+};
+
 export const parseTimeToMinutes = (time: string): number => {
   const [h, m] = time.split(':').map(Number);
   return h * 60 + m;

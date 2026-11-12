@@ -7,6 +7,7 @@ import {
   formatDayMonth,
   shiftDate,
   getMondayOfWeek,
+  isEvenAcademicWeek,
   parseTimeToMinutes,
   addMinutes,
   stripLeadingZero,
@@ -84,6 +85,36 @@ describe('getMondayOfWeek', () => {
   it('для среды возвращает понедельник той же недели', () => {
     const monday = getMondayOfWeek(new Date(2025, 0, 8));
     expect(formatISO(monday)).toBe('2025-01-06');
+  });
+});
+
+describe('isEvenAcademicWeek', () => {
+  it.each([
+    [2025, 8, 1, false],
+    [2025, 8, 7, false],
+    [2025, 8, 8, true],
+    [2025, 8, 14, true],
+    [2025, 8, 15, false],
+    // В 2026 году 1 сентября — вторник: следующая неделя начинается 7 сентября.
+    [2026, 8, 1, false],
+    [2026, 8, 6, false],
+    [2026, 8, 7, true],
+    // Продолжаем счёт от сентября предыдущего года, включая каникулы.
+    [2026, 0, 1, true],
+    [2026, 1, 2, false],
+    [2026, 7, 31, false],
+    // Високосный год не сбивает нумерацию.
+    [2024, 1, 29, false],
+    [2024, 2, 4, true],
+  ])('%i-%i-%i: чётная неделя — %s', (year, month, day, expected) => {
+    expect(isEvenAcademicWeek(new Date(year, month, day))).toBe(expected);
+  });
+
+  it('не зависит от времени суток и не изменяет исходную дату', () => {
+    const date = new Date(2026, 8, 7, 23, 59, 59);
+    const timestamp = date.getTime();
+    expect(isEvenAcademicWeek(date)).toBe(true);
+    expect(date.getTime()).toBe(timestamp);
   });
 });
 
