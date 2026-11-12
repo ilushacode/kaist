@@ -163,7 +163,7 @@ export const ScheduleComponent = ({ selectedDate, onDateChange }: ScheduleCompon
           const gap = gapByAfterIndex.get(i);
           return (
             <ScheduleLesson
-              key={`group-${i}`}
+              key={`${selectedGroup}-${group[0].time}`}
               lessons={group}
               date={renderedDate}
               gap={gap}
@@ -173,6 +173,7 @@ export const ScheduleComponent = ({ selectedDate, onDateChange }: ScheduleCompon
       </div>
     );
   }, [
+    selectedGroup,
     scheduleLoading,
     scheduleError,
     lessons,

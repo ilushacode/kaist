@@ -205,7 +205,6 @@
 }
 
 .schedule_lesson__content:active {
-  transform: scale(0.99);
   background-color: color-mix(in srgb, var(--accent-background-color) 90%, transparent);
 }
 
@@ -526,3 +525,64 @@
   font-weight: 700;
   pointer-events: none;
 }
+
+
+/* Скрытые пары остаются в таймлайне и сохраняют удобную область нажатия. */
+.schedule_lesson__grid { align-items: start; }
+.schedule_lesson__content {
+  min-height: 44px;
+  -webkit-touch-callout: none;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.28s ease, opacity 0.28s ease;
+}
+/* Постоянные симметричные отступы не дают типу прыгать при схлопывании деталей.
+   Отступ перед деталями находится внутри сворачиваемой области. */
+.schedule_lesson__content,
+.schedule_lesson__grid--group .schedule_lesson__content { padding-block: 0.95rem; }
+.schedule_lesson__content__type {
+  margin-bottom: 0;
+  line-height: 14px;
+}
+.schedule_lesson__content--hidden {
+  opacity: 0.25;
+}
+.schedule_lesson__break { transition: opacity 0.28s ease; }
+/* Перемена общая для соседних строк: приглушаем её с обеих сторон скрытой пары. */
+.schedule_lesson:has(.schedule_lesson__content--hidden) .schedule_lesson__break,
+.schedule_lesson:has(+ .schedule_lesson .schedule_lesson__content--hidden) .schedule_lesson__break {
+  opacity: 0.25;
+}
+.schedule_lesson__times { transition: opacity 0.28s ease; }
+.schedule_lesson__line__dot { transition: border-color 0.28s ease; }
+.schedule_lesson__line__line, .schedule_lesson__line__dot__inner {
+  transition: background-color 0.28s ease, opacity 0.28s ease;
+}
+.schedule_lesson--hidden .schedule_lesson__times { opacity: 0.25; }
+.schedule_lesson__line { transition: opacity 0.28s ease; }
+.schedule_lesson--hidden .schedule_lesson__line { opacity: 0.25; }
+.schedule_lesson--hidden .schedule_lesson__line__dot { border-color: var(--light-font-color); }
+.schedule_lesson--hidden .schedule_lesson__line__line { background-color: var(--light-font-color); }
+.schedule_lesson--hidden .schedule_lesson__line__dot__inner { opacity: 0; }
+.schedule_lesson__content:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .schedule_lesson * { transition: none !important; }
+}
+
+
+/* Один механизм меняет высоту вместе с внутренними отступами, без замеров auto. */
+.schedule_lesson__details {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.schedule_lesson__details-clip { min-height: 0; overflow: hidden; }
+.schedule_lesson__details-body { padding-top: 0.55rem; }
+.schedule_lesson__content--hidden .schedule_lesson__details {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+/* Браузер не должен корректировать прокрутку вслед за схлопывающейся карточкой. */
+.schedule { overflow-anchor: none; }

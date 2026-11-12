@@ -85,6 +85,7 @@ export interface Student {
 }
 
 export interface Lesson {
+  seriesKey?: string;
   time: string;
   subject: string;
   type: string;

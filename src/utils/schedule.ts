@@ -45,7 +45,16 @@ export const isLessonOnDate = (lesson: GroupScheduleLesson, date: Date): boolean
   return ds.includes(parity) && isSameWeekday(lesson, date);
 };
 
+// Даты повторений не входят в ключ: обновление списка дат сохраняет выбор пользователя.
+export const getLessonSeriesKey = (lesson: GroupScheduleLesson): string =>
+  JSON.stringify([
+    lesson.s, getLessonType(lesson.k), lesson.t, lesson.p,
+    lesson.b, lesson.a, lesson.u, lesson.d,
+    ...(lesson.ds ?? []).filter((value) => value === EVEN_WEEK || value === ODD_WEEK).sort(),
+  ].map((value) => (value ?? '').trim().replace(/\s+/g, ' ').toLowerCase()));
+
 export const mapLesson = (lesson: GroupScheduleLesson): Lesson => ({
+  seriesKey: getLessonSeriesKey(lesson),
   time: lesson?.t ?? '',
   subject: lesson?.s ?? '',
   type: getLessonType(lesson?.k),

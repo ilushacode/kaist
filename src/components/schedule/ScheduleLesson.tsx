@@ -1,4 +1,5 @@
 import { useEffect, useReducer } from 'react';
+import { useLongPress } from '../../hooks/useLongPress';
 import { School } from 'lucide-react';
 import {
   addMinutes,
@@ -66,22 +67,17 @@ export const ScheduleLesson = ({ lessons, date, gap }: ScheduleLessonProps) => {
   const isActive = isLessonNow(date, start, end);
   const isFinished = isLessonPast(date, end);
 
+  const selectedGroup = useStore((state) => state.selectedGroup);
+  const hiddenEntries = useStore((state) => state.hiddenLessons[selectedGroup ?? '']);
+  const allHidden = lessons.every((lesson) => !!hiddenEntries?.[lesson.seriesKey ?? '']);
   const isGroup = lessons.length > 1;
-
-  const contentClass = [
-    'schedule_lesson__content',
-    isActive && 'schedule_lesson__active',
-    isFinished && 'schedule_lesson__past',
-  ]
-    .filter(Boolean)
-    .join(' ');
 
   const handleLessonClick = (lesson: Lesson) => {
     openModal(LessonModal, { lesson, date, group: useStore.getState().selectedGroup });
   };
 
   return (
-    <div className={`schedule_lesson ${isGroup ? 'schedule_lesson--group' : ''}`}>
+    <div className={`schedule_lesson ${allHidden ? 'schedule_lesson--hidden' : ''} ${isGroup ? 'schedule_lesson--group' : ''}`}>
       <div className="schedule_lesson__times">
         <p className="schedule_lesson__times__start">{stripLeadingZero(start)}</p>
         <p className="schedule_lesson__times__end">{end}</p>
@@ -100,24 +96,15 @@ export const ScheduleLesson = ({ lessons, date, gap }: ScheduleLessonProps) => {
       <div className="schedule_lesson__content__wrapper">
         <div className={`schedule_lesson__grid ${isGroup ? 'schedule_lesson__grid--group' : ''}`}>
           {lessons.map((lesson, i) => (
-            <div
-              key={`${lesson.subject}-${lesson.room}-${i}`}
-              className={contentClass}
-              onClick={() => handleLessonClick(lesson)}
-            >
-              <span className="schedule_lesson__content__type">
-                {getLessonTypeLabel(lesson.type)}
-              </span>
-              <h3 className="schedule_lesson__content__title">{lesson.subject}</h3>
-              <div className="schedule_lesson__content__meta">
-                <span className="schedule_lesson__content__meta__icon">
-                  <School size={14} strokeWidth={1.6} />
-                </span>
-                <span className="schedule_lesson__content__meta__text">
-                  {formatBuilding(lesson.building)} — {lesson.room}
-                </span>
-              </div>
-            </div>
+            <LessonCard
+              key={`${selectedGroup}-${date.getTime()}-${lesson.seriesKey ?? i}`}
+              lesson={lesson}
+              hidden={!!hiddenEntries?.[lesson.seriesKey ?? '']}
+              isActive={isActive}
+              isFinished={isFinished}
+              group={selectedGroup}
+              onOpen={() => handleLessonClick(lesson)}
+            />
           ))}
         </div>
 
@@ -132,3 +119,59 @@ export const ScheduleLesson = ({ lessons, date, gap }: ScheduleLessonProps) => {
     </div>
   );
 };
+
+
+interface LessonCardProps {
+  lesson: Lesson;
+  hidden: boolean;
+  isActive: boolean;
+  isFinished: boolean;
+  group: string | null;
+  onOpen: () => void;
+}
+
+function LessonCard({ lesson, hidden, isActive, isFinished, group, onOpen }: LessonCardProps) {
+  const toggle = () => {
+    if (group && lesson.seriesKey) useStore.getState().toggleLessonHidden(group, lesson.seriesKey);
+  };
+  const handlers = useLongPress(toggle, () => hidden ? toggle() : onOpen());
+  const className = [
+    'schedule_lesson__content',
+    hidden && 'schedule_lesson__content--hidden',
+    !hidden && isActive && 'schedule_lesson__active',
+    (hidden || isFinished) && 'schedule_lesson__past',
+  ].filter(Boolean).join(' ');
+
+  return (
+    <div
+      className={className}
+      {...handlers}
+      role="button"
+      tabIndex={0}
+      aria-expanded={!hidden}
+      aria-label={`${lesson.subject}, ${getLessonTypeLabel(lesson.type)}. ${hidden ? 'Показать пару' : 'Открыть сведения. Удерживайте, чтобы скрыть'}`}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          if (!event.repeat) { if (hidden) toggle(); else onOpen(); }
+        } else if (event.key.toLowerCase() === 'h') {
+          event.preventDefault();
+          if (!event.repeat) toggle();
+        }
+      }}
+    >
+      <span className="schedule_lesson__content__type">{getLessonTypeLabel(lesson.type)}</span>
+      <div className="schedule_lesson__details" aria-hidden={hidden}>
+        <div className="schedule_lesson__details-clip">
+          <div className="schedule_lesson__details-body">
+            <h3 className="schedule_lesson__content__title">{lesson.subject}</h3>
+            <div className="schedule_lesson__content__meta">
+              <span className="schedule_lesson__content__meta__icon"><School size={14} strokeWidth={1.6} /></span>
+              <span className="schedule_lesson__content__meta__text">{formatBuilding(lesson.building)} — {lesson.room}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

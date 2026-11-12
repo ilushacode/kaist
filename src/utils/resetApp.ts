@@ -29,7 +29,7 @@ async function clearEverything(): Promise<void> {
   // 1. Кэши и SW
   await clearCachesOnly();
 
-  // 2. Данные приложения, включая личные заметки (IndexedDB + localStorage из стора)
+  // 2. Данные приложения, включая скрытые пары и личные заметки (IndexedDB + localStorage из стора)
   try {
     await useStore.getState().resetAll();
   } catch (err) {

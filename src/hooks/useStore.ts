@@ -101,6 +101,8 @@ const sanitizeGroup = (raw: unknown): string =>
   String(raw ?? '').replace(/\D/g, '').slice(0, 4);
 
 export interface StoreState {
+  hiddenLessons: Record<string, Record<string, true>>;
+  toggleLessonHidden: (group: string, seriesKey: string) => void;
   subjectNotes: Record<string, Record<string, string>>;
   setSubjectNote: (group: string, subject: string, text: string) => boolean;
   groups: string[];
@@ -155,6 +157,19 @@ export interface StoreState {
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
+      hiddenLessons: {},
+      toggleLessonHidden: (group, seriesKey) => {
+        if (!/^\d{4}$/.test(group) || !seriesKey) return;
+        set((state) => {
+          const hiddenLessons = { ...state.hiddenLessons };
+          const entries = { ...hiddenLessons[group] };
+          if (entries[seriesKey]) delete entries[seriesKey];
+          else entries[seriesKey] = true;
+          if (Object.keys(entries).length) hiddenLessons[group] = entries;
+          else delete hiddenLessons[group];
+          return { hiddenLessons };
+        });
+      },
       subjectNotes: {},
       setSubjectNote: (group, subject, text) => {
         const key = getSubjectKey(subject);
@@ -321,6 +336,7 @@ export const useStore = create<StoreState>()(
 
       resetAll: async () => {
         set({
+          hiddenLessons: {},
           subjectNotes: {},
           groups: [],
           selectedGroup: null,
@@ -363,8 +379,9 @@ export const useStore = create<StoreState>()(
     {
       name: STORAGE_KEY,
       storage: createJSONStorage(() => localStorageAdapter),
-      version: 10,
+      version: 11,
       partialize: (s) => ({
+        hiddenLessons: s.hiddenLessons,
         subjectNotes: s.subjectNotes,
         groups: s.groups,
         selectedGroup: s.selectedGroup,
@@ -378,6 +395,7 @@ export const useStore = create<StoreState>()(
           scheduleCache?: unknown;
           lastFetchedAt?: unknown;
         };
+        if (version < 11 && p) p.hiddenLessons = {};
         // v10: личные заметки по предметам, отдельно для каждой группы.
         if (version < 10 && p) p.subjectNotes = {};
         if (version < 2 && p?.groups) {

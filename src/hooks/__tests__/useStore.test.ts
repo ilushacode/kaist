@@ -209,3 +209,25 @@ describe('useStore', () => {
     });
   });
 });
+
+
+describe('скрытые пары', () => {
+  it('сохраняет скрытие отдельно для группы и восстанавливает после перезагрузки', async () => {
+    useStore.getState().toggleLessonHidden('3439', 'series');
+    useStore.getState().selectGroup('4191');
+    expect(useStore.getState().hiddenLessons['4191']).toBeUndefined();
+    useStore.getState().hiddenLessons = {};
+    await useStore.persist.rehydrate();
+    expect(useStore.getState().hiddenLessons['3439'].series).toBe(true);
+    useStore.getState().toggleLessonHidden('3439', 'series');
+    expect(useStore.getState().hiddenLessons).toEqual({});
+  });
+  it('мигрирует v10 без потери заметок и сбрасывает скрытие', async () => {
+    expect(useStore.persist.getOptions().migrate?.({ subjectNotes: { '3439': { math: 'note' } } }, 10))
+      .toMatchObject({ hiddenLessons: {}, subjectNotes: { '3439': { math: 'note' } } });
+    useStore.getState().toggleLessonHidden('3439', 'series');
+    await useStore.getState().resetAll();
+    await useStore.persist.rehydrate();
+    expect(useStore.getState().hiddenLessons).toEqual({});
+  });
+});
