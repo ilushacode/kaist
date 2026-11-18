@@ -42,60 +42,45 @@
   background-color: color-mix(in srgb, var(--accent-background-color) 85%, transparent);
 }
 
-/* Шапка: время + даты */
+/* Дата и время начала */
 
 .exams__header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.exams__time {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+  align-items: flex-start;
+  gap: 0.5rem;
   font-size: 0.82rem;
   font-weight: 600;
-  color: var(--primary-color);
+  line-height: 1.35;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.005em;
 }
 
-/* Даты */
+.exams__header > svg {
+  flex-shrink: 0;
+  margin-top: 0.1em;
+  color: var(--primary-color);
+}
 
-.exams__dates {
+.exams__datetime {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 0.15rem 0.35rem;
 }
 
 .exams__date {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem 0.55rem;
-  border-radius: 0.4rem;
-  border: 1px solid color-mix(in srgb, var(--light-font-color) 20%, transparent);
-  background-color: transparent;
-  font-size: 0.72rem;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
   color: var(--font-color);
-  line-height: 1;
 }
 
-.exams__date--past {
+.exams__date--past,
+.exams__time {
   color: var(--light-font-color);
-  opacity: 0.45;
-  border-color: color-mix(in srgb, var(--light-font-color) 12%, transparent);
+}
+
+.exams__time {
+  white-space: nowrap;
 }
 
 .exams__date--today {
   color: var(--primary-color);
-  border-color: var(--primary-color);
-  background-color: color-mix(in srgb, var(--primary-color) 8%, transparent);
 }
 
 /* Название дисциплины */

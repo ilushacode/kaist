@@ -73,4 +73,15 @@ describe('ExamsComponent', () => {
     renderWithProviders();
     expect(screen.getByText('Матан')).toBeInTheDocument();
   });
+
+  it('показывает дату и только время начала экзамена', () => {
+    mockStore({
+      examsGroups: {
+        '3439': [{ s: 'Матан', tm: '09:40, 11:20', dt: '12.01.2027' }],
+      },
+    });
+    const { container } = renderWithProviders();
+    const header = container.querySelector('.exams__header');
+    expect(header).toHaveTextContent(/^12 января 2027 · 9:40$/);
+  });
 });
