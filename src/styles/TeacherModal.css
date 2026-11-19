@@ -131,36 +131,6 @@
   margin: 0;
 }
 
-/* Экзамены */
-
-.teacher_modal__exams {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding-top: 0.85rem;
-  margin-top: 0.5rem;
-  border-top: 1px solid color-mix(in srgb, var(--light-font-color) 15%, transparent);
-}
-
-.teacher_modal__exams__title {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.68rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--light-font-color);
-  opacity: 0.8;
-  margin: 0;
-}
-
-.teacher_modal__exams__list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
 /* Центрированные состояния */
 
 .teacher_modal__centred {

@@ -85,13 +85,14 @@ describe('TeacherModal', () => {
     expect(screen.getByText('3439, 3440')).toBeInTheDocument();
   });
 
-  it('показывает экзамены, если есть', () => {
+  it('показывает пустой день, если у преподавателя есть только экзамены', () => {
     mockStore({
       examsGroups: {
         '3439': [{ s: 'Матан', tm: '10:00', p: 'ИВАНОВ И.И.', dt: '15.06' }],
       },
     });
     render(<TeacherModal teacher="ИВАНОВ И.И." />);
-    expect(screen.getByText('Экзамены')).toBeInTheDocument();
+    expect(screen.getByText('Свободный день')).toBeInTheDocument();
+    expect(screen.queryByText('Экзамены')).not.toBeInTheDocument();
   });
 });

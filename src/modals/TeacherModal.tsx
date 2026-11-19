@@ -1,12 +1,10 @@
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpenText } from 'lucide-react';
 import { useStore } from '../hooks/useStore';
 import { capitalizeName } from '../utils/string';
 import { formatDM } from '../utils/date';
 import {
   buildTeacherLessons,
-  getTeacherExams,
   getTeacherLessonsForDate,
   hasLessonsOnDate,
 } from '../utils/teacherSchedule';
@@ -23,16 +21,13 @@ interface TeacherModalProps {
 
 export default function TeacherModal({ teacher }: TeacherModalProps) {
   const scheduleGroups = useStore((s) => s.scheduleGroups);
-  const examsGroups = useStore((s) => s.examsGroups);
   const scheduleLoading = useStore((s) => s.scheduleLoading);
   const scheduleError = useStore((s) => s.scheduleError);
 
   const refs = useMemo(
-    () => buildTeacherLessons(teacher, scheduleGroups, examsGroups),
-    [teacher, scheduleGroups, examsGroups]
+    () => buildTeacherLessons(teacher, scheduleGroups, null),
+    [teacher, scheduleGroups]
   );
-
-  const exams = useMemo(() => getTeacherExams(refs), [refs]);
 
   const today = useMemo(() => {
     const d = new Date();
@@ -62,8 +57,6 @@ export default function TeacherModal({ teacher }: TeacherModalProps) {
     );
   }
 
-  const hasContent = lessons.length > 0 || exams.length > 0;
-
   return (
     <div className="teacher_modal">
       <header className="teacher_modal__header">
@@ -90,7 +83,7 @@ export default function TeacherModal({ teacher }: TeacherModalProps) {
             transition={slideTransition}
             className="teacher_modal__slide"
           >
-            {!hasContent ? (
+            {lessons.length === 0 ? (
               <div className="teacher_modal__empty">
                 <p className="teacher_modal__empty__title">Свободный день</p>
                 <p className="teacher_modal__empty__subtitle">
@@ -102,24 +95,6 @@ export default function TeacherModal({ teacher }: TeacherModalProps) {
                 {lessons.map((item, i) => (
                   <TeacherLessonCard key={i} item={item} date={renderedDate} />
                 ))}
-
-                {exams.length > 0 && (
-                  <section className="teacher_modal__exams">
-                    <h3 className="teacher_modal__exams__title">
-                      <BookOpenText size={14} strokeWidth={2.2} />
-                      Экзамены
-                    </h3>
-                    <div className="teacher_modal__exams__list">
-                      {exams.map((item, i) => (
-                        <TeacherLessonCard
-                          key={`exam-${i}`}
-                          item={item}
-                          compact
-                        />
-                      ))}
-                    </div>
-                  </section>
-                )}
               </div>
             )}
           </motion.div>
